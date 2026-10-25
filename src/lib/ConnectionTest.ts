@@ -99,24 +99,21 @@ export async function testCamera(row: unknown, opts: TestOptions = {}): Promise<
 function probeStream(client: CameraClient, timeoutMs: number): Promise<TestResult> {
     return new Promise(resolve => {
         let done = false;
-        let handle: StreamHandle | undefined;
         const finish = (r: TestResult): void => {
             if (done) {
                 return;
             }
             done = true;
             clearTimeout(timer);
-            handle?.close();
+            // stream callbacks are always asynchronous, so `handle` is assigned by now
+            handle.close();
             resolve(r);
         };
         const timer = setTimeout(() => finish({ ok: false, message: `no answer within ${Math.round(timeoutMs / 1000)} s` }), timeoutMs);
-        handle = client.open({
+        const handle: StreamHandle = client.open({
             onOpen: () => finish({ ok: true, message: 'ok' }),
             onData: () => undefined,
             onClose: f => finish({ ok: false, message: f.message }),
         });
-        if (done) {
-            handle.close();
-        }
     });
 }
