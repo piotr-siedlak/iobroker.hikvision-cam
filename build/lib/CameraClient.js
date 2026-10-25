@@ -33,13 +33,24 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CameraClient = exports.DEVICE_INFO_PATH = exports.ALERT_STREAM_PATH = void 0;
+exports.CameraClient = exports.RequestError = exports.DEVICE_INFO_PATH = exports.ALERT_STREAM_PATH = void 0;
 const http = __importStar(require("node:http"));
 const https = __importStar(require("node:https"));
 const Authentication_1 = require("./Authentication");
 const util_1 = require("./util");
 exports.ALERT_STREAM_PATH = '/ISAPI/Event/notification/alertStream';
 exports.DEVICE_INFO_PATH = '/ISAPI/System/deviceInfo';
+/** Rejection of getText/getBuffer; keeps the failure kind for diagnostics. */
+class RequestError extends Error {
+    kind;
+    status;
+    constructor(kind, message, status) {
+        super(message);
+        this.kind = kind;
+        this.status = status;
+    }
+}
+exports.RequestError = RequestError;
 /**
  * Read-only ISAPI client: only HTTP GET requests, HTTP Digest (or explicitly
  * enabled Basic) authentication. Never logs credentials or auth headers.
@@ -149,7 +160,7 @@ class CameraClient {
                     res.on('end', () => settle(() => resolve({ body: Buffer.concat(chunks), contentType })));
                     res.on('error', err => settle(() => reject(err)));
                 },
-                onFail: f => settle(() => reject(new Error(f.message))),
+                onFail: f => settle(() => reject(new RequestError(f.kind, f.message, f.status))),
             });
         });
     }
