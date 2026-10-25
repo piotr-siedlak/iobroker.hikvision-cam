@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "hikvision-cam",
-    "version": "0.4.2",
+    "version": "0.5.0",
     "news": {
+      "0.5.0": {
+        "en": "Discover tab: scan a subnet and add several cameras with the same login",
+        "pl": "Zakładka Wyszukiwanie: skanowanie podsieci i dodawanie wielu kamer z tym samym loginem"
+      },
       "0.4.2": {
         "en": "Admin: camera cards use the full width; values are no longer cut off",
         "pl": "Panel: karty kamer na całą szerokość; wartości nie są już obcinane"
@@ -83,8 +87,20 @@
     "cameras": [],
     "pushPort": 8089,
     "pushBind": "0.0.0.0",
-    "historySize": 20
+    "historySize": 20,
+    "scanSubnet": "",
+    "scanProtocol": "http",
+    "scanPort": 80,
+    "scanUser": "",
+    "scanPassword": "",
+    "lastScanResult": ""
   },
+  "encryptedNative": [
+    "scanPassword"
+  ],
+  "protectedNative": [
+    "scanPassword"
+  ],
   "objects": [],
   "instanceObjects": [
     {

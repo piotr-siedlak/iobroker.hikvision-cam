@@ -193,6 +193,104 @@
         }
       }
     },
+    "_discoverTab": {
+      "type": "panel",
+      "label": "Discover",
+      "items": {
+        "_d0": {
+          "type": "staticText",
+          "newLine": true,
+          "xs": 12,
+          "text": "Scan a subnet for Hikvision cameras and add all of them with the same login. Save your settings first: after a successful scan the new cameras are saved and this page reloads."
+        },
+        "scanSubnet": {
+          "type": "text",
+          "label": "Subnet or range",
+          "newLine": true,
+          "xs": 12,
+          "sm": 12,
+          "md": 6,
+          "default": "",
+          "help": "e.g. 192.168.1.0/24 or 192.168.1.10-60 (private addresses only, max 1024)"
+        },
+        "scanProtocol": {
+          "type": "select",
+          "label": "Protocol",
+          "xs": 6,
+          "sm": 6,
+          "md": 3,
+          "default": "http",
+          "options": [
+            {
+              "label": "HTTP",
+              "value": "http"
+            },
+            {
+              "label": "HTTPS",
+              "value": "https"
+            }
+          ]
+        },
+        "scanPort": {
+          "type": "number",
+          "label": "Port",
+          "xs": 6,
+          "sm": 6,
+          "md": 3,
+          "min": 1,
+          "max": 65535,
+          "default": 80
+        },
+        "scanUser": {
+          "type": "text",
+          "label": "User",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "default": ""
+        },
+        "scanPassword": {
+          "type": "password",
+          "label": "Password",
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "default": ""
+        },
+        "_scan": {
+          "type": "sendTo",
+          "label": "Scan and add cameras",
+          "command": "discover",
+          "jsonData": "{\"subnet\":\"${data.scanSubnet}\",\"protocol\":\"${data.scanProtocol}\",\"port\":\"${data.scanPort}\",\"username\":\"${data.scanUser}\",\"password\":\"${data.scanPassword}\"}",
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 4,
+          "showProcess": true,
+          "timeout": 150000,
+          "reloadBrowser": true,
+          "variant": "contained",
+          "icon": "search"
+        },
+        "lastScanResult": {
+          "type": "text",
+          "label": "Last scan",
+          "newLine": true,
+          "xs": 12,
+          "readOnly": true,
+          "minRows": 2,
+          "maxRows": 6,
+          "default": ""
+        },
+        "_d1": {
+          "type": "staticText",
+          "newLine": true,
+          "xs": 12,
+          "text": "Each address gets one read-only request with HTTP Digest login; devices that reject the login are listed but not added. Cameras that are already configured are skipped."
+        }
+      }
+    },
     "_optionsTab": {
       "type": "panel",
       "label": "Options",

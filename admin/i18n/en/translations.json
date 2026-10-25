@@ -45,5 +45,12 @@
   "Recent triggers kept per camera in lastEvent.history (0 = off)": "Recent triggers kept per camera in lastEvent.history (0 = off)",
   "Test": "Test",
   "Test connection": "Test connection",
-  "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.": "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens."
+  "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.": "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.",
+  "Discover": "Discover",
+  "Scan a subnet for Hikvision cameras and add all of them with the same login. Save your settings first: after a successful scan the new cameras are saved and this page reloads.": "Scan a subnet for Hikvision cameras and add all of them with the same login. Save your settings first: after a successful scan the new cameras are saved and this page reloads.",
+  "Subnet or range": "Subnet or range",
+  "e.g. 192.168.1.0/24 or 192.168.1.10-60 (private addresses only, max 1024)": "e.g. 192.168.1.0/24 or 192.168.1.10-60 (private addresses only, max 1024)",
+  "Scan and add cameras": "Scan and add cameras",
+  "Last scan": "Last scan",
+  "Each address gets one read-only request with HTTP Digest login; devices that reject the login are listed but not added. Cameras that are already configured are skipped.": "Each address gets one read-only request with HTTP Digest login; devices that reject the login are listed but not added. Cameras that are already configured are skipped."
 }

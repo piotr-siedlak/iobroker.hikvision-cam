@@ -1,6 +1,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { CameraRuntime } from './lib/CameraRuntime';
 import { testCamera } from './lib/ConnectionTest';
+import { buildCameraRows, describeScan, expandTargets, scanHosts } from './lib/Discovery';
 import { normalizeCameras, normalizeHistorySize, normalizePushSettings } from './lib/config';
 import { PushServer } from './lib/PushServer';
 import type { IoApi, LogApi } from './lib/io';
@@ -9,6 +10,7 @@ class HikvisionCam extends utils.Adapter {
     private runtimes: CameraRuntime[] = [];
     private pushServer: PushServer | undefined;
     private readonly testsRunning = new Set<string>();
+    private scanRunning = false;
 
     constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({ ...options, name: 'hikvision-cam' });
@@ -97,6 +99,10 @@ class HikvisionCam extends utils.Adapter {
 
     /** Admin "Test connection" button (sendTo command `testConnection`) with the row's current values. */
     private async onMessage(obj: ioBroker.Message): Promise<void> {
+        if (obj?.callback && obj.command === 'discover') {
+            await this.onDiscover(obj);
+            return;
+        }
         if (!obj?.callback || obj.command !== 'testConnection') {
             return;
         }
@@ -126,6 +132,75 @@ class HikvisionCam extends utils.Adapter {
             reply({ error: err instanceof Error ? err.message : String(err) });
         } finally {
             this.testsRunning.delete(key);
+        }
+    }
+
+    /**
+     * Admin "Scan and add cameras": scans a private subnet with one set of
+     * credentials, appends new cameras to the saved configuration (passwords
+     * encrypted like the admin table does) and asks the admin page to reload.
+     * Saving the instance configuration restarts the adapter.
+     */
+    private async onDiscover(obj: ioBroker.Message): Promise<void> {
+        const reply = (payload: Record<string, unknown>): void => {
+            this.sendTo(obj.from, obj.command, payload, obj.callback);
+        };
+        if (this.scanRunning) {
+            reply({ error: 'A scan is already running' });
+            return;
+        }
+        let msg: Record<string, unknown>;
+        try {
+            msg = (typeof obj.message === 'string' ? JSON.parse(obj.message) : obj.message) as Record<string, unknown>;
+        } catch {
+            reply({ error: 'Could not read the scan settings. Save the settings and try again.' });
+            return;
+        }
+        const https = String(msg?.protocol ?? 'http').toLowerCase() === 'https';
+        const port = parseInt(String(msg?.port ?? ''), 10) || (https ? 443 : 80);
+        const username = String(msg?.username ?? '').trim();
+        const password = String(msg?.password ?? '');
+        const { hosts, error } = expandTargets(String(msg?.subnet ?? ''));
+        if (error) {
+            reply({ error });
+            return;
+        }
+        if (!username || username === 'undefined') {
+            reply({ error: 'Enter the user name the cameras share' });
+            return;
+        }
+        if (port < 1 || port > 65535) {
+            reply({ error: 'Invalid port' });
+            return;
+        }
+
+        this.scanRunning = true;
+        try {
+            const req = { subnet: String(msg.subnet), https, port, username, password };
+            this.log.info(`Scanning ${hosts.length} address(es) for Hikvision cameras on port ${port}`);
+            const result = await scanHosts(hosts, req);
+            const instanceId = `system.adapter.${this.namespace}`;
+            const instance = await this.getForeignObjectAsync(instanceId);
+            if (!instance) {
+                reply({ error: 'Instance configuration not found' });
+                return;
+            }
+            const existing = Array.isArray(instance.native.cameras) ? (instance.native.cameras as Array<Record<string, unknown>>) : [];
+            const added = buildCameraRows(result.found, existing, req, plain => this.encrypt(plain));
+            const summary = describeScan(result, added);
+            this.log.info(summary);
+            if (!added.length) {
+                reply({ error: `No new cameras added. ${summary}` });
+                return;
+            }
+            instance.native.cameras = [...existing, ...added];
+            instance.native.lastScanResult = `${new Date().toLocaleString()}: ${summary}`;
+            await this.setForeignObjectAsync(instanceId, instance);
+            reply({ reloadBrowser: true, result: summary });
+        } catch (err) {
+            reply({ error: err instanceof Error ? err.message : String(err) });
+        } finally {
+            this.scanRunning = false;
         }
     }
 

@@ -58,6 +58,16 @@ Use push mode only when the camera cannot keep an outgoing `alertStream` connect
 * **Limitation:** push has no persistent connection, so a dead camera cannot be detected. Alarms stay `unknown` until the first push after an adapter start, then they are tracked with the alarm timeout. `info.streamConnected` only means a push has been received. Prefer stream mode wherever possible.
 * Keep the listener port reachable from the camera network only. The listener has no authentication, because Hikvision HTTP Listening sends none.
 
+### Adding several cameras at once (Discover)
+
+On the **Discover** tab, enter a subnet or range, the protocol/port and the login the cameras share, then press **Scan and add cameras**. Save any other changes first. Examples: `192.168.1.0/24`, `192.168.1.10-60`, `10.0.0.5, 10.0.0.9`.
+
+* Only private addresses are accepted, at most 1024 per scan. The scan runs about 32 addresses in parallel and gives up after roughly 100 s.
+* Every address with an open port gets **one** read-only `GET /ISAPI/System/deviceInfo` with HTTP Digest. The password is never sent with Basic, so devices that only offer Basic never see it.
+* New devices are appended to the camera list in stream mode, with the shared login and the device name (or model) as the name. Their passwords are stored encrypted. The configuration is saved, the page reloads, and the adapter restarts.
+* Devices that reject the login and cameras already in the list are not added. The summary appears under *Last scan* and in the log.
+* HTTPS cameras found by a scan get *Verify TLS certificate* switched off, because their certificates are almost always self-signed.
+
 ### Test connection button
 
 Each camera card has a **Test connection** button. It uses the values currently in the card, so you don't need to save first, but the instance must be running. The test only sends GET requests:
@@ -155,6 +165,9 @@ on({ id: 'hikvision-cam.0.cameras.front_gate.events.intrusion.active', val: true
 * The stream-inactivity timeout is only armed after the stream delivered data once; before that, silent half-open TCP connections are detected only by TCP keep-alive.
 
 ## Changelog
+
+### 0.5.0
+* Admin **Discover** tab: scan a private subnet/range and add all found cameras with the same login
 
 ### 0.4.2
 * Admin: camera cards use the full width; values are no longer cut off

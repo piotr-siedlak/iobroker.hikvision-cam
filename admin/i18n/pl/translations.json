@@ -45,5 +45,12 @@
   "Recent triggers kept per camera in lastEvent.history (0 = off)": "Liczba ostatnich wyzwoleń na kamerę w lastEvent.history (0 = wyłączone)",
   "Test": "Test",
   "Test connection": "Testuj połączenie",
-  "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.": "Dodaj jedną kartę na kamerę przyciskiem +. Wpisz nazwę, adres i dane logowania, a następnie naciśnij Testuj połączenie. Reguły detekcji (przekroczenie linii, wtargnięcie itd.) konfiguruje się w samej kamerze; adapter tylko nasłuchuje."
+  "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.": "Dodaj jedną kartę na kamerę przyciskiem +. Wpisz nazwę, adres i dane logowania, a następnie naciśnij Testuj połączenie. Reguły detekcji (przekroczenie linii, wtargnięcie itd.) konfiguruje się w samej kamerze; adapter tylko nasłuchuje.",
+  "Discover": "Wyszukiwanie",
+  "Scan a subnet for Hikvision cameras and add all of them with the same login. Save your settings first: after a successful scan the new cameras are saved and this page reloads.": "Przeskanuj podsieć w poszukiwaniu kamer Hikvision i dodaj je wszystkie z tym samym loginem. Najpierw zapisz ustawienia: po udanym skanowaniu nowe kamery zostaną zapisane, a strona przeładuje się.",
+  "Subnet or range": "Podsieć lub zakres",
+  "e.g. 192.168.1.0/24 or 192.168.1.10-60 (private addresses only, max 1024)": "np. 192.168.1.0/24 lub 192.168.1.10-60 (tylko adresy prywatne, maks. 1024)",
+  "Scan and add cameras": "Skanuj i dodaj kamery",
+  "Last scan": "Ostatnie skanowanie",
+  "Each address gets one read-only request with HTTP Digest login; devices that reject the login are listed but not added. Cameras that are already configured are skipped.": "Każdy adres dostaje jedno żądanie tylko do odczytu z logowaniem HTTP Digest; urządzenia, które odrzucą login, są wymienione, ale nie dodane. Kamery już skonfigurowane są pomijane."
 }
