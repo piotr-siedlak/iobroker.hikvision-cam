@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CameraRuntime = void 0;
 const CameraClient_1 = require("./CameraClient");
 const ConnectionManager_1 = require("./ConnectionManager");
+const EventNormalizer_1 = require("./EventNormalizer");
 const EventStateManager_1 = require("./EventStateManager");
 const RetryPolicy_1 = require("./RetryPolicy");
 const util_1 = require("./util");
@@ -85,6 +86,7 @@ class CameraRuntime {
     lastHeartbeatWrite = 0;
     rawCaptured = 0;
     lastLoggedReason = '';
+    pushSeen = false;
     constructor(cfg, io, log, runtimeOpts = {}) {
         this.cfg = cfg;
         this.io = io;
@@ -168,8 +170,70 @@ class CameraRuntime {
         await this.markStoredEventsUnknown();
     }
     start() {
+        if (this.cfg.mode === 'push') {
+            this.log.debug(`[${this.id}] push mode: waiting for alerts from ${this.cfg.host}`);
+            this.enqueue(() => this.io.setState(`${this.root}.info.status`, 'push: waiting for first alert'));
+            if (this.cfg.username) {
+                void this.fetchDeviceInfo();
+            }
+            return;
+        }
         this.log.debug(`[${this.id}] starting stream to ${this.cfg.https ? 'https' : 'http'}://${this.cfg.host}:${this.cfg.port}`);
         this.manager.start();
+    }
+    /** Receiver hooks for the shared push listener (push mode only). */
+    pushTarget() {
+        return {
+            id: this.id,
+            host: this.cfg.host,
+            onPart: part => this.ingestPushPart(part),
+            onParseError: msg => this.onParseError(msg),
+        };
+    }
+    setPushListenerError(message) {
+        this.enqueue(async () => {
+            await this.io.setState(`${this.root}.info.status`, `push: listener failed: ${message}`);
+            await this.io.setState(`${this.root}.info.lastError`, message);
+        });
+    }
+    /**
+     * Push mode has no persistent connection, so "disconnected" cannot be
+     * detected: alarms stay unknown until the first push of this run arrives,
+     * then they are tracked (with the alarm timeout) like stream events.
+     */
+    ingestPushPart(part) {
+        let ev;
+        try {
+            const fields = (0, EventNormalizer_1.parsePart)(part);
+            if (!fields) {
+                return;
+            }
+            if (this.cfg.diagnostic) {
+                this.onRaw(part.body.toString('utf8', 0, 2000));
+            }
+            ev = (0, EventNormalizer_1.fieldsToEvent)(fields, this.id, new Date().toISOString(), { discoverUnknown: this.cfg.discoverUnknown });
+        }
+        catch (err) {
+            this.onParseError((0, util_1.describeError)(err));
+            return;
+        }
+        if (!this.pushSeen) {
+            this.pushSeen = true;
+            this.connected = true;
+            this.states.setConnected(true);
+            const now = new Date().toISOString();
+            this.enqueue(async () => {
+                await this.io.setState(`${this.root}.info.connection`, true);
+                await this.io.setState(`${this.root}.info.streamConnected`, true);
+                await this.io.setState(`${this.root}.info.lastSuccessfulConnection`, now);
+                await this.io.setState(`${this.root}.info.status`, 'push: receiving');
+            });
+            this.log.info(`[${this.id}] first push alert received`);
+            this.runtimeOpts.onConnectionChange?.();
+        }
+        if (ev) {
+            this.onEvent(ev);
+        }
     }
     async stop() {
         this.manager.stop();

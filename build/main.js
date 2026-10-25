@@ -36,8 +36,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils = __importStar(require("@iobroker/adapter-core"));
 const CameraRuntime_1 = require("./lib/CameraRuntime");
 const config_1 = require("./lib/config");
+const PushServer_1 = require("./lib/PushServer");
 class HikvisionCam extends utils.Adapter {
     runtimes = [];
+    pushServer;
     constructor(options = {}) {
         super({ ...options, name: 'hikvision-cam' });
         this.on('ready', () => void this.onReady());
@@ -79,6 +81,33 @@ class HikvisionCam extends utils.Adapter {
                 this.log.error(`[${cfg.id}] failed to start: ${err instanceof Error ? err.message : String(err)}`);
             }
         }
+        await this.startPushServer(log, cameras.filter(c => c.mode === 'push').map(c => c.id));
+    }
+    async startPushServer(log, pushIds) {
+        const pushRuntimes = this.runtimes.filter(r => pushIds.includes(r.id));
+        if (!pushRuntimes.length) {
+            return;
+        }
+        const { settings, error } = (0, config_1.normalizePushSettings)(this.config);
+        if (error) {
+            this.log.warn(error);
+        }
+        const server = new PushServer_1.PushServer({ port: settings.port, bind: settings.bind, log });
+        for (const r of pushRuntimes) {
+            server.add(r.pushTarget());
+        }
+        try {
+            const port = await server.start();
+            this.pushServer = server;
+            this.log.info(`Push listener on ${settings.bind || 'all interfaces'}:${port} for ${pushRuntimes.length} camera(s)`);
+        }
+        catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            this.log.error(`Push listener could not start on port ${settings.port}: ${msg}`);
+            for (const r of pushRuntimes) {
+                r.setPushListenerError(msg);
+            }
+        }
     }
     async updateConnection() {
         await this.setStateAsync('info.connection', this.runtimes.some(r => r.isConnected()), true);
@@ -112,6 +141,7 @@ class HikvisionCam extends utils.Adapter {
     }
     async onUnload(callback) {
         try {
+            await this.pushServer?.stop();
             await Promise.all(this.runtimes.map(r => r.stop()));
             await this.setStateAsync('info.connection', false, true);
         }

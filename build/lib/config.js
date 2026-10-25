@@ -1,7 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.normalizePushSettings = normalizePushSettings;
 exports.normalizeCameras = normalizeCameras;
 const util_1 = require("./util");
+function normalizePushSettings(native) {
+    const port = Math.round(num(native.pushPort, 8089, 1, 65535));
+    const bind = String(native.pushBind ?? '').trim();
+    if (bind && bind !== '0.0.0.0' && bind !== '::' && (0, util_1.validateHost)(bind)) {
+        return { settings: { port, bind: '' }, error: `Invalid push bind address "${bind}"; listening on all interfaces` };
+    }
+    return { settings: { port, bind: bind === '0.0.0.0' ? '' : bind } };
+}
 function num(value, def, min, max) {
     const n = typeof value === 'number' ? value : parseFloat(String(value ?? ''));
     if (!Number.isFinite(n)) {
@@ -63,6 +72,7 @@ function normalizeCameras(rows) {
                 .filter(Boolean)),
             discoverUnknown: bool(row.discoverUnknown, true),
             diagnostic: bool(row.diagnostic, false),
+            mode: String(row.mode ?? 'stream').toLowerCase() === 'push' ? 'push' : 'stream',
         });
     });
     return { cameras, errors };
