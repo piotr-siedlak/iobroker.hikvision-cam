@@ -165,6 +165,8 @@ class CameraRuntime {
     }
     async stop() {
         this.manager.stop();
+        // Shutting down is not "no alarm": leave every alarm unknown for whoever reads the states next.
+        this.states.setConnected(false);
         this.states.dispose();
         await Promise.race([this.chain, new Promise(resolve => setTimeout(resolve, 2000).unref?.())]);
         try {
@@ -405,7 +407,7 @@ class CameraRuntime {
     }
     async fetchDeviceInfo() {
         try {
-            const xml = await this.client.getText(CameraClient_1.DEVICE_INFO_PATH);
+            const xml = await (this.runtimeOpts.fetchText ?? ((p) => this.client.getText(p)))(CameraClient_1.DEVICE_INFO_PATH);
             const fields = new Map();
             (0, xml_1.flattenXml)((0, xml_1.parseXml)(xml), fields);
             const model = fields.get('model');
