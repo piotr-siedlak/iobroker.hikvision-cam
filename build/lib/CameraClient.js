@@ -267,6 +267,14 @@ class CameraClient {
                 fail({ kind: 'unsupported', status, message: `ISAPI alertStream is not supported (HTTP ${status})` });
                 return;
             }
+            if (status === 503) {
+                fail({
+                    kind: 'protocol',
+                    status,
+                    message: 'Camera busy (HTTP 503): the alertStream client limit may be reached - close other clients (iVMS, NVR, other integrations)',
+                });
+                return;
+            }
             fail({ kind: 'protocol', status, message: `Unexpected HTTP status ${status}` });
         };
         try {
