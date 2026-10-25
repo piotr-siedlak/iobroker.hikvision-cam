@@ -1,0 +1,21 @@
+{
+  "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.": "Dodaj jeden wiersz na kamerę. Reguły detekcji (przekroczenie linii, wtargnięcie itd.) konfiguruje się w samej kamerze; adapter tylko nasłuchuje. Użytkownik kamery potrzebuje uprawnienia do zdalnych powiadomień / alarmów.",
+  "Cameras": "Kamery",
+  "Enabled": "Aktywna",
+  "Name": "Nazwa",
+  "IP address or host": "Adres IP lub host",
+  "Protocol": "Protokół",
+  "Port": "Port",
+  "User": "Użytkownik",
+  "Password": "Hasło",
+  "Authentication": "Uwierzytelnianie",
+  "Digest (recommended)": "Digest (zalecane)",
+  "Basic": "Basic",
+  "Verify TLS certificate": "Weryfikuj certyfikat TLS",
+  "Alarm timeout (s)": "Limit czasu alarmu (s)",
+  "Reconnect interval (s)": "Odstęp ponowień połączenia (s)",
+  "Stream inactivity timeout (s)": "Limit bezczynności strumienia (s)",
+  "Ignore events (comma separated)": "Ignoruj zdarzenia (po przecinku)",
+  "Create unknown event types": "Twórz nieznane typy zdarzeń",
+  "Log raw payloads (diagnostic)": "Loguj surowe dane (diagnostyka)"
+}

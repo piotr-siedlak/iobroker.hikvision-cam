@@ -1,0 +1,59 @@
+{
+  "type": "panel",
+  "i18n": true,
+  "items": {
+    "_help": {
+      "type": "staticText",
+      "text": "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.",
+      "newLine": true,
+      "xs": 12
+    },
+    "cameras": {
+      "type": "table",
+      "label": "Cameras",
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 12,
+      "xl": 12,
+      "noDelete": false,
+      "items": [
+        { "type": "checkbox", "attr": "enabled", "title": "Enabled", "width": "70px", "default": true },
+        { "type": "text", "attr": "name", "title": "Name", "width": "130px" },
+        { "type": "text", "attr": "host", "title": "IP address or host", "width": "150px" },
+        {
+          "type": "select",
+          "attr": "protocol",
+          "title": "Protocol",
+          "width": "90px",
+          "default": "http",
+          "options": [
+            { "label": "HTTP", "value": "http" },
+            { "label": "HTTPS", "value": "https" }
+          ]
+        },
+        { "type": "number", "attr": "port", "title": "Port", "width": "80px", "default": 80, "min": 1, "max": 65535 },
+        { "type": "text", "attr": "username", "title": "User", "width": "110px" },
+        { "type": "password", "attr": "password", "title": "Password", "width": "130px" },
+        {
+          "type": "select",
+          "attr": "authMode",
+          "title": "Authentication",
+          "width": "120px",
+          "default": "digest",
+          "options": [
+            { "label": "Digest (recommended)", "value": "digest" },
+            { "label": "Basic", "value": "basic" }
+          ]
+        },
+        { "type": "checkbox", "attr": "verifyTls", "title": "Verify TLS certificate", "width": "110px", "default": true },
+        { "type": "number", "attr": "alarmTimeout", "title": "Alarm timeout (s)", "width": "110px", "default": 5, "min": 1, "max": 3600 },
+        { "type": "number", "attr": "reconnectInterval", "title": "Reconnect interval (s)", "width": "120px", "default": 5, "min": 1, "max": 3600 },
+        { "type": "number", "attr": "streamTimeout", "title": "Stream inactivity timeout (s)", "width": "140px", "default": 60, "min": 15, "max": 3600 },
+        { "type": "text", "attr": "eventFilter", "title": "Ignore events (comma separated)", "width": "180px" },
+        { "type": "checkbox", "attr": "discoverUnknown", "title": "Create unknown event types", "width": "130px", "default": true },
+        { "type": "checkbox", "attr": "diagnostic", "title": "Log raw payloads (diagnostic)", "width": "130px", "default": false }
+      ]
+    }
+  }
+}

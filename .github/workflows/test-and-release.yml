@@ -1,0 +1,52 @@
+name: Test and build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20.x, 22.x]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npm test
+      - name: Lint (informational for now)
+        run: npm run lint
+        continue-on-error: true
+
+  # GitHub installs of ioBroker adapters run no build step, so the compiled
+  # output in build/ is committed by CI after a green test run on main.
+  commit-build:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Commit build output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f build
+          if git diff --cached --quiet; then
+            echo "build/ unchanged"
+          else
+            git commit -m "chore: update compiled build [skip ci]"
+            git push
+          fi

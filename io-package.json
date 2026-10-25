@@ -1,0 +1,88 @@
+{
+  "common": {
+    "name": "hikvision-cam",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "Initial release: real-time ISAPI alertStream events",
+        "pl": "Pierwsze wydanie: zdarzenia ISAPI alertStream w czasie rzeczywistym"
+      }
+    },
+    "titleLang": {
+      "en": "Hikvision Camera Events",
+      "pl": "Zdarzenia kamer Hikvision"
+    },
+    "desc": {
+      "en": "Receives real-time smart events (line crossing, intrusion, motion, human/vehicle) directly from Hikvision cameras via ISAPI",
+      "pl": "Odbiera zdarzenia inteligentne (przekroczenie linii, wtargnięcie, ruch, człowiek/pojazd) w czasie rzeczywistym bezpośrednio z kamer Hikvision przez ISAPI"
+    },
+    "authors": [
+      "Piotr Siedlak"
+    ],
+    "keywords": [
+      "hikvision",
+      "camera",
+      "isapi",
+      "alarm",
+      "line crossing",
+      "intrusion"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "hikvision-cam.svg",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/piotr-siedlak/iobroker.hikvision-cam/main/admin/hikvision-cam.svg",
+    "readme": "https://github.com/piotr-siedlak/iobroker.hikvision-cam/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "iot-systems",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "json"
+    },
+    "supportCustoms": false,
+    "dependencies": [
+      {
+        "js-controller": ">=5.0.19"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=6.17.14"
+      }
+    ]
+  },
+  "native": {
+    "cameras": []
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "At least one camera stream is connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
+}

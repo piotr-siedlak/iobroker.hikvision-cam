@@ -1,0 +1,21 @@
+{
+  "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.": "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.",
+  "Cameras": "Cameras",
+  "Enabled": "Enabled",
+  "Name": "Name",
+  "IP address or host": "IP address or host",
+  "Protocol": "Protocol",
+  "Port": "Port",
+  "User": "User",
+  "Password": "Password",
+  "Authentication": "Authentication",
+  "Digest (recommended)": "Digest (recommended)",
+  "Basic": "Basic",
+  "Verify TLS certificate": "Verify TLS certificate",
+  "Alarm timeout (s)": "Alarm timeout (s)",
+  "Reconnect interval (s)": "Reconnect interval (s)",
+  "Stream inactivity timeout (s)": "Stream inactivity timeout (s)",
+  "Ignore events (comma separated)": "Ignore events (comma separated)",
+  "Create unknown event types": "Create unknown event types",
+  "Log raw payloads (diagnostic)": "Log raw payloads (diagnostic)"
+}
