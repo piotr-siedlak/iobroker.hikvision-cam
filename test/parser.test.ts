@@ -87,7 +87,7 @@ describe('EventStreamParser', () => {
     });
 
     it('falls back to bare XML documents without a boundary', () => {
-        const { parser, parts } = collect(undefined);
+        const { parser, parts } = collect('');
         const xml = alertXml();
         parser.feed(Buffer.from(xml.slice(0, 40)));
         parser.feed(Buffer.from(xml.slice(40) + alertXml({ eventType: 'VMD' })));
