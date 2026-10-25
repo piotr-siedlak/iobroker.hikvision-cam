@@ -1,8 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.normalizeHistorySize = normalizeHistorySize;
 exports.normalizePushSettings = normalizePushSettings;
 exports.normalizeCameras = normalizeCameras;
 const util_1 = require("./util");
+function normalizeHistorySize(value) {
+    return Math.round(num(value, 20, 0, 200));
+}
 function normalizePushSettings(native) {
     const port = Math.round(num(native.pushPort, 8089, 1, 65535));
     const bind = String(native.pushBind ?? '').trim();
@@ -72,6 +76,7 @@ function normalizeCameras(rows) {
                 .filter(Boolean)),
             discoverUnknown: bool(row.discoverUnknown, true),
             diagnostic: bool(row.diagnostic, false),
+            snapshot: bool(row.snapshot, false),
             mode: String(row.mode ?? 'stream').toLowerCase() === 'push' ? 'push' : 'stream',
         });
     });

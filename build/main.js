@@ -60,6 +60,14 @@ class HikvisionCam extends utils.Adapter {
             this.log.info('No enabled cameras configured - add a camera in the adapter settings');
             return;
         }
+        if (cameras.some(c => c.snapshot)) {
+            await this.setObjectNotExistsAsync('snapshots', {
+                type: 'meta',
+                common: { name: 'Snapshots', type: 'meta.user' },
+                native: {},
+            });
+        }
+        const historySize = (0, config_1.normalizeHistorySize)(this.config.historySize);
         const io = this.makeIo();
         const log = {
             debug: m => this.log.debug(m),
@@ -71,6 +79,7 @@ class HikvisionCam extends utils.Adapter {
             try {
                 const runtime = new CameraRuntime_1.CameraRuntime(cfg, io, log, {
                     onConnectionChange: () => void this.updateConnection(),
+                    historySize,
                 });
                 await runtime.init();
                 this.runtimes.push(runtime);
@@ -128,6 +137,15 @@ class HikvisionCam extends utils.Adapter {
             getNumber: async (id) => {
                 const s = await this.getStateAsync(id);
                 return typeof s?.val === 'number' ? s.val : undefined;
+            },
+            getString: async (id) => {
+                const s = await this.getStateAsync(id);
+                return typeof s?.val === 'string' ? s.val : undefined;
+            },
+            writeFile: async (name, data) => {
+                const metaId = `${this.namespace}.snapshots`;
+                await this.writeFileAsync(metaId, name, data);
+                return `${metaId}/${name}`;
             },
             listStates: async (prefix) => {
                 const ns = `${this.namespace}.`;

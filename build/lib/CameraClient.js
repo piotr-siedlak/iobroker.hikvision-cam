@@ -114,7 +114,11 @@ class CameraClient {
         };
     }
     /** Fetch a small ISAPI document (read-only GET). */
-    getText(path, maxBytes = 64 * 1024) {
+    async getText(path, maxBytes = 64 * 1024) {
+        return (await this.getBuffer(path, maxBytes)).body.toString('utf8');
+    }
+    /** Fetch a bounded binary resource, e.g. a JPEG snapshot (read-only GET). */
+    getBuffer(path, maxBytes) {
         return new Promise((resolve, reject) => {
             let settled = false;
             const settle = (fn) => {
@@ -130,6 +134,7 @@ class CameraClient {
             }, 15000);
             const handle = this.request(path, {
                 onResponse: res => {
+                    const contentType = String(res.headers['content-type'] ?? '');
                     const chunks = [];
                     let size = 0;
                     res.on('data', (d) => {
@@ -141,7 +146,7 @@ class CameraClient {
                         }
                         chunks.push(d);
                     });
-                    res.on('end', () => settle(() => resolve(Buffer.concat(chunks).toString('utf8'))));
+                    res.on('end', () => settle(() => resolve({ body: Buffer.concat(chunks), contentType })));
                     res.on('error', err => settle(() => reject(err)));
                 },
                 onFail: f => settle(() => reject(new Error(f.message))),

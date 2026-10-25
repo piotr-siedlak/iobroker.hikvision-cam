@@ -58,7 +58,14 @@ const LAST_EVENT_STATES = [
     { key: 'direction', type: 'string', role: 'text', name: N('Direction', 'Kierunek') },
     { key: 'sequence', type: 'number', role: 'value', name: N('Event sequence number', 'Numer kolejny zdarzenia') },
     { key: 'json', type: 'string', role: 'json', name: N('Event as JSON', 'Zdarzenie jako JSON') },
+    { key: 'history', type: 'string', role: 'json', name: N('Recent triggers (JSON array, newest first)', 'Ostatnie wyzwolenia (tablica JSON, najnowsze pierwsze)') },
 ];
+const SNAPSHOT_STATES = [
+    { key: 'snapshot', type: 'string', role: 'text', name: N('Snapshot file (adapter file storage)', 'Plik zdjęcia (pamięć plików adaptera)') },
+    { key: 'snapshotTime', type: 'string', role: 'date', name: N('Snapshot taken at', 'Czas wykonania zdjęcia') },
+];
+const SNAPSHOT_MIN_INTERVAL_MS = 2000;
+const SNAPSHOT_MAX_BYTES = 5 * 1024 * 1024;
 const MAX_PENDING_WRITES = 5000;
 const THROTTLE_MS = 30_000;
 /** Everything that belongs to one camera: connection, alarm state, ioBroker objects. */
@@ -87,6 +94,10 @@ class CameraRuntime {
     rawCaptured = 0;
     lastLoggedReason = '';
     pushSeen = false;
+    history = [];
+    snapshotBusy = false;
+    lastSnapshotAt = 0;
+    snapshotErrorLogged = false;
     constructor(cfg, io, log, runtimeOpts = {}) {
         this.cfg = cfg;
         this.io = io;
@@ -158,6 +169,18 @@ class CameraRuntime {
         }
         for (const def of LAST_EVENT_STATES) {
             await this.ensureState(`${this.root}.lastEvent.${def.key}`, def);
+        }
+        if (this.cfg.snapshot) {
+            for (const def of SNAPSHOT_STATES) {
+                await this.ensureState(`${this.root}.lastEvent.${def.key}`, def);
+            }
+        }
+        try {
+            const stored = JSON.parse((await this.io.getString(`${this.root}.lastEvent.history`)) ?? '[]');
+            this.history = Array.isArray(stored) ? stored.slice(0, this.historySize()) : [];
+        }
+        catch {
+            this.history = [];
         }
         this.eventsReceived = (await this.io.getNumber(`${this.root}.info.eventsReceived`)) ?? 0;
         this.parseErrors = (await this.io.getNumber(`${this.root}.info.parseErrors`)) ?? 0;
@@ -348,6 +371,74 @@ class CameraRuntime {
         }
         const seq = outcome === 'trigger' ? ++this.sequence : this.sequence;
         this.enqueue(() => this.writeLastEvent(ev, seq));
+        if (outcome === 'trigger') {
+            this.addHistory(ev, seq);
+            void this.takeSnapshot(ev);
+        }
+    }
+    historySize() {
+        return this.runtimeOpts.historySize ?? 20;
+    }
+    addHistory(ev, seq) {
+        const max = this.historySize();
+        if (max <= 0) {
+            return;
+        }
+        this.history.unshift({
+            sequence: seq,
+            eventType: ev.eventType,
+            rawEventType: ev.rawEventType,
+            target: ev.target,
+            channelId: ev.channelId,
+            ruleId: ev.ruleId,
+            regionId: ev.regionId,
+            timestamp: ev.timestamp,
+            receivedAt: ev.receivedAt,
+        });
+        this.history.length = Math.min(this.history.length, max);
+        const json = JSON.stringify(this.history);
+        this.enqueue(() => this.io.setState(`${this.root}.lastEvent.history`, json, { force: true }));
+    }
+    /**
+     * Opt-in: one JPEG per trigger from the camera's own snapshot endpoint
+     * (read-only GET), at most every 2 s; only the latest image per camera is kept.
+     */
+    async takeSnapshot(ev) {
+        const now = Date.now();
+        if (!this.cfg.snapshot || this.snapshotBusy || now - this.lastSnapshotAt < SNAPSHOT_MIN_INTERVAL_MS) {
+            return;
+        }
+        this.snapshotBusy = true;
+        this.lastSnapshotAt = now;
+        try {
+            const channel = Math.min(Math.max(Math.trunc(ev.channelId), 1), 512);
+            const path = `/ISAPI/Streaming/channels/${channel}01/picture`;
+            const fetch = this.runtimeOpts.fetchBuffer ?? ((p) => this.client.getBuffer(p, SNAPSHOT_MAX_BYTES));
+            const { body, contentType } = await fetch(path);
+            if (!/^image\//i.test(contentType) || body.length < 100) {
+                throw new Error(`unexpected snapshot response (${contentType || 'no content type'}, ${body.length} bytes)`);
+            }
+            const stored = await this.io.writeFile(`${this.id}/latest.jpg`, body);
+            const at = new Date().toISOString();
+            this.enqueue(async () => {
+                await this.io.setState(`${this.root}.lastEvent.snapshot`, stored, { force: true });
+                await this.io.setState(`${this.root}.lastEvent.snapshotTime`, at, { force: true });
+            });
+            this.snapshotErrorLogged = false;
+        }
+        catch (err) {
+            const msg = `[${this.id}] snapshot failed: ${(0, util_1.redact)((0, util_1.describeError)(err), [this.cfg.password])}`;
+            if (this.snapshotErrorLogged) {
+                this.log.debug(msg);
+            }
+            else {
+                this.snapshotErrorLogged = true;
+                this.log.warn(msg);
+            }
+        }
+        finally {
+            this.snapshotBusy = false;
+        }
     }
     async writeLastEvent(ev, seq) {
         const p = `${this.root}.lastEvent`;
