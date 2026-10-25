@@ -13,7 +13,7 @@ class HikvisionCam extends utils.Adapter {
     }
 
     private async onReady(): Promise<void> {
-        await this.setState('info.connection', false, true);
+        await this.setStateAsync('info.connection', false, true);
 
         const { cameras, errors } = normalizeCameras((this.config as { cameras?: unknown }).cameras);
         for (const e of errors) {
@@ -48,28 +48,28 @@ class HikvisionCam extends utils.Adapter {
     }
 
     private async updateConnection(): Promise<void> {
-        await this.setState('info.connection', this.runtimes.some(r => r.isConnected()), true);
+        await this.setStateAsync('info.connection', this.runtimes.some(r => r.isConnected()), true);
     }
 
     private makeIo(): IoApi {
         return {
             extendObject: async (id, obj) => {
-                await this.extendObject(id, obj as ioBroker.PartialObject);
+                await this.extendObjectAsync(id, obj as ioBroker.PartialObject);
             },
             setState: async (id, val, opts) => {
                 if (opts?.force) {
-                    await this.setState(id, { val, ack: true });
+                    await this.setStateAsync(id, { val, ack: true });
                 } else {
-                    await this.setStateChanged(id, { val, ack: true });
+                    await this.setStateChangedAsync(id, { val, ack: true });
                 }
             },
             getNumber: async id => {
-                const s = await this.getState(id);
+                const s = await this.getStateAsync(id);
                 return typeof s?.val === 'number' ? s.val : undefined;
             },
             listStates: async prefix => {
                 const ns = `${this.namespace}.`;
-                const res = await this.getObjectView('system', 'state', {
+                const res = await this.getObjectViewAsync('system', 'state', {
                     startkey: `${ns}${prefix}`,
                     endkey: `${ns}${prefix}香`,
                 });
@@ -81,7 +81,7 @@ class HikvisionCam extends utils.Adapter {
     private async onUnload(callback: () => void): Promise<void> {
         try {
             await Promise.all(this.runtimes.map(r => r.stop()));
-            await this.setState('info.connection', false, true);
+            await this.setStateAsync('info.connection', false, true);
         } catch {
             // ignore errors during shutdown
         } finally {
