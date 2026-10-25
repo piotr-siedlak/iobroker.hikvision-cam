@@ -38,5 +38,10 @@
   "Listen on address": "Listen on address",
   "Optional. Only used by cameras whose mode is Push. Stream mode is recommended: it detects lost connections, push mode cannot.": "Optional. Only used by cameras whose mode is Push. Stream mode is recommended: it detects lost connections, push mode cannot.",
   "Camera: Configuration > Network > Advanced Settings > Alarm Server (HTTP Listening): destination IP = this ioBroker host, URL = /, port = listener port, protocol HTTP. Then tick 'Notify Surveillance Center' in each rule's linkage.": "Camera: Configuration > Network > Advanced Settings > Alarm Server (HTTP Listening): destination IP = this ioBroker host, URL = /, port = listener port, protocol HTTP. Then tick 'Notify Surveillance Center' in each rule's linkage.",
-  "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only.": "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only."
+  "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only.": "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only.",
+  "Snapshot on trigger": "Snapshot on trigger",
+  "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage": "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage",
+  "Options": "Options",
+  "Trigger history size": "Trigger history size",
+  "Recent triggers kept per camera in lastEvent.history (0 = off)": "Recent triggers kept per camera in lastEvent.history (0 = off)"
 }

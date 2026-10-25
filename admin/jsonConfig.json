@@ -168,6 +168,14 @@
             },
             {
               "type": "checkbox",
+              "attr": "snapshot",
+              "title": "Snapshot on trigger",
+              "width": "110px",
+              "default": false,
+              "tooltip": "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage"
+            },
+            {
+              "type": "checkbox",
               "attr": "diagnostic",
               "title": "Log raw payloads (diagnostic)",
               "width": "130px",
@@ -177,6 +185,24 @@
           "encryptedAttributes": [
             "password"
           ]
+        }
+      }
+    },
+    "_optionsTab": {
+      "type": "panel",
+      "label": "Options",
+      "items": {
+        "historySize": {
+          "type": "number",
+          "label": "Trigger history size",
+          "min": 0,
+          "max": 200,
+          "default": 20,
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 3,
+          "help": "Recent triggers kept per camera in lastEvent.history (0 = off)"
         }
       }
     },

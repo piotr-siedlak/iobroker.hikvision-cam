@@ -1,6 +1,6 @@
 import * as utils from '@iobroker/adapter-core';
 import { CameraRuntime } from './lib/CameraRuntime';
-import { normalizeCameras, normalizePushSettings } from './lib/config';
+import { normalizeCameras, normalizeHistorySize, normalizePushSettings } from './lib/config';
 import { PushServer } from './lib/PushServer';
 import type { IoApi, LogApi } from './lib/io';
 
@@ -33,6 +33,14 @@ class HikvisionCam extends utils.Adapter {
             return;
         }
 
+        if (cameras.some(c => c.snapshot)) {
+            await this.setObjectNotExistsAsync('snapshots', {
+                type: 'meta',
+                common: { name: 'Snapshots', type: 'meta.user' },
+                native: {},
+            } as ioBroker.SettableObject);
+        }
+        const historySize = normalizeHistorySize((this.config as unknown as Record<string, unknown>).historySize);
         const io = this.makeIo();
         const log: LogApi = {
             debug: m => this.log.debug(m),
@@ -45,6 +53,7 @@ class HikvisionCam extends utils.Adapter {
             try {
                 const runtime = new CameraRuntime(cfg, io, log, {
                     onConnectionChange: () => void this.updateConnection(),
+                    historySize,
                 });
                 await runtime.init();
                 this.runtimes.push(runtime);
@@ -102,6 +111,15 @@ class HikvisionCam extends utils.Adapter {
             getNumber: async id => {
                 const s = await this.getStateAsync(id);
                 return typeof s?.val === 'number' ? s.val : undefined;
+            },
+            getString: async id => {
+                const s = await this.getStateAsync(id);
+                return typeof s?.val === 'string' ? s.val : undefined;
+            },
+            writeFile: async (name, data) => {
+                const metaId = `${this.namespace}.snapshots`;
+                await this.writeFileAsync(metaId, name, data);
+                return `${metaId}/${name}`;
             },
             listStates: async prefix => {
                 const ns = `${this.namespace}.`;

@@ -65,7 +65,8 @@
   "native": {
     "cameras": [],
     "pushPort": 8089,
-    "pushBind": "0.0.0.0"
+    "pushBind": "0.0.0.0",
+    "historySize": 20
   },
   "objects": [],
   "instanceObjects": [

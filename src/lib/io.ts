@@ -6,6 +6,9 @@ export interface IoApi {
     /** Writes with ack=true. Unchanged values are skipped unless `force` is set. */
     setState(id: string, val: StateVal, opts?: { force?: boolean }): Promise<void>;
     getNumber(id: string): Promise<number | undefined>;
+    getString(id: string): Promise<string | undefined>;
+    /** Stores a file in the adapter's file storage; returns its storage path. */
+    writeFile(name: string, data: Buffer): Promise<string>;
     /** Relative ids of all state objects below `prefix`. */
     listStates(prefix: string): Promise<string[]>;
 }

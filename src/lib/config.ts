@@ -18,11 +18,17 @@ export interface NormalizedCameraConfig {
     diagnostic: boolean;
     /** stream = adapter connects to alertStream; push = camera posts alerts to the adapter's listener. */
     mode: 'stream' | 'push';
+    /** Fetch a JPEG from the camera on every new trigger (opt-in). */
+    snapshot: boolean;
 }
 
 export interface PushSettings {
     port: number;
     bind: string;
+}
+
+export function normalizeHistorySize(value: unknown): number {
+    return Math.round(num(value, 20, 0, 200));
 }
 
 export function normalizePushSettings(native: Record<string, unknown>): { settings: PushSettings; error?: string } {
@@ -101,6 +107,7 @@ export function normalizeCameras(rows: unknown): { cameras: NormalizedCameraConf
             ),
             discoverUnknown: bool(row.discoverUnknown, true),
             diagnostic: bool(row.diagnostic, false),
+            snapshot: bool(row.snapshot, false),
             mode: String(row.mode ?? 'stream').toLowerCase() === 'push' ? 'push' : 'stream',
         });
     });

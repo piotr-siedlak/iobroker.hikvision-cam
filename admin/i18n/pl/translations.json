@@ -38,5 +38,10 @@
   "Listen on address": "Nasłuchuj na adresie",
   "Optional. Only used by cameras whose mode is Push. Stream mode is recommended: it detects lost connections, push mode cannot.": "Opcjonalne. Używane tylko przez kamery w trybie Push. Zalecany jest tryb strumienia: wykrywa utratę połączenia, tryb push tego nie potrafi.",
   "Camera: Configuration > Network > Advanced Settings > Alarm Server (HTTP Listening): destination IP = this ioBroker host, URL = /, port = listener port, protocol HTTP. Then tick 'Notify Surveillance Center' in each rule's linkage.": "Kamera: Konfiguracja > Sieć > Ustawienia zaawansowane > Serwer alarmów (HTTP Listening): docelowy IP = ten host ioBroker, URL = /, port = port odbiornika, protokół HTTP. Następnie zaznacz 'Powiadom centrum monitoringu' w powiązaniach każdej reguły.",
-  "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only.": "Akceptowane są tylko żądania z adresów IP skonfigurowanych kamer push. Udostępniaj port wyłącznie sieci kamer."
+  "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only.": "Akceptowane są tylko żądania z adresów IP skonfigurowanych kamer push. Udostępniaj port wyłącznie sieci kamer.",
+  "Snapshot on trigger": "Zdjęcie przy wyzwoleniu",
+  "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage": "Pobierz jedno zdjęcie JPEG z kamery przy każdym nowym wyzwoleniu i zachowaj najnowsze w pamięci plików adaptera",
+  "Options": "Opcje",
+  "Trigger history size": "Rozmiar historii wyzwoleń",
+  "Recent triggers kept per camera in lastEvent.history (0 = off)": "Liczba ostatnich wyzwoleń na kamerę w lastEvent.history (0 = wyłączone)"
 }
