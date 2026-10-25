@@ -36,12 +36,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils = __importStar(require("@iobroker/adapter-core"));
 const CameraRuntime_1 = require("./lib/CameraRuntime");
 const ConnectionTest_1 = require("./lib/ConnectionTest");
+const Discovery_1 = require("./lib/Discovery");
 const config_1 = require("./lib/config");
 const PushServer_1 = require("./lib/PushServer");
 class HikvisionCam extends utils.Adapter {
     runtimes = [];
     pushServer;
     testsRunning = new Set();
+    scanRunning = false;
     constructor(options = {}) {
         super({ ...options, name: 'hikvision-cam' });
         this.on('ready', () => void this.onReady());
@@ -123,6 +125,10 @@ class HikvisionCam extends utils.Adapter {
     }
     /** Admin "Test connection" button (sendTo command `testConnection`) with the row's current values. */
     async onMessage(obj) {
+        if (obj?.callback && obj.command === 'discover') {
+            await this.onDiscover(obj);
+            return;
+        }
         if (!obj?.callback || obj.command !== 'testConnection') {
             return;
         }
@@ -155,6 +161,76 @@ class HikvisionCam extends utils.Adapter {
         }
         finally {
             this.testsRunning.delete(key);
+        }
+    }
+    /**
+     * Admin "Scan and add cameras": scans a private subnet with one set of
+     * credentials, appends new cameras to the saved configuration (passwords
+     * encrypted like the admin table does) and asks the admin page to reload.
+     * Saving the instance configuration restarts the adapter.
+     */
+    async onDiscover(obj) {
+        const reply = (payload) => {
+            this.sendTo(obj.from, obj.command, payload, obj.callback);
+        };
+        if (this.scanRunning) {
+            reply({ error: 'A scan is already running' });
+            return;
+        }
+        let msg;
+        try {
+            msg = (typeof obj.message === 'string' ? JSON.parse(obj.message) : obj.message);
+        }
+        catch {
+            reply({ error: 'Could not read the scan settings. Save the settings and try again.' });
+            return;
+        }
+        const https = String(msg?.protocol ?? 'http').toLowerCase() === 'https';
+        const port = parseInt(String(msg?.port ?? ''), 10) || (https ? 443 : 80);
+        const username = String(msg?.username ?? '').trim();
+        const password = String(msg?.password ?? '');
+        const { hosts, error } = (0, Discovery_1.expandTargets)(String(msg?.subnet ?? ''));
+        if (error) {
+            reply({ error });
+            return;
+        }
+        if (!username || username === 'undefined') {
+            reply({ error: 'Enter the user name the cameras share' });
+            return;
+        }
+        if (port < 1 || port > 65535) {
+            reply({ error: 'Invalid port' });
+            return;
+        }
+        this.scanRunning = true;
+        try {
+            const req = { subnet: String(msg.subnet), https, port, username, password };
+            this.log.info(`Scanning ${hosts.length} address(es) for Hikvision cameras on port ${port}`);
+            const result = await (0, Discovery_1.scanHosts)(hosts, req);
+            const instanceId = `system.adapter.${this.namespace}`;
+            const instance = await this.getForeignObjectAsync(instanceId);
+            if (!instance) {
+                reply({ error: 'Instance configuration not found' });
+                return;
+            }
+            const existing = Array.isArray(instance.native.cameras) ? instance.native.cameras : [];
+            const added = (0, Discovery_1.buildCameraRows)(result.found, existing, req, plain => this.encrypt(plain));
+            const summary = (0, Discovery_1.describeScan)(result, added);
+            this.log.info(summary);
+            if (!added.length) {
+                reply({ error: `No new cameras added. ${summary}` });
+                return;
+            }
+            instance.native.cameras = [...existing, ...added];
+            instance.native.lastScanResult = `${new Date().toLocaleString()}: ${summary}`;
+            await this.setForeignObjectAsync(instanceId, instance);
+            reply({ reloadBrowser: true, result: summary });
+        }
+        catch (err) {
+            reply({ error: err instanceof Error ? err.message : String(err) });
+        }
+        finally {
+            this.scanRunning = false;
         }
     }
     async updateConnection() {
