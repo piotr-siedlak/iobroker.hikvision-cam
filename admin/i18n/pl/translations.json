@@ -1,5 +1,4 @@
 {
-  "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.": "Dodaj jeden wiersz na kamerę. Reguły detekcji (przekroczenie linii, wtargnięcie itd.) konfiguruje się w samej kamerze; adapter tylko nasłuchuje. Użytkownik kamery potrzebuje uprawnienia do zdalnych powiadomień / alarmów.",
   "Cameras": "Kamery",
   "Enabled": "Aktywna",
   "Name": "Nazwa",
@@ -45,5 +44,6 @@
   "Trigger history size": "Rozmiar historii wyzwoleń",
   "Recent triggers kept per camera in lastEvent.history (0 = off)": "Liczba ostatnich wyzwoleń na kamerę w lastEvent.history (0 = wyłączone)",
   "Test": "Test",
-  "Test connection": "Testuj połączenie"
+  "Test connection": "Testuj połączenie",
+  "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.": "Dodaj jedną kartę na kamerę przyciskiem +. Wpisz nazwę, adres i dane logowania, a następnie naciśnij Testuj połączenie. Reguły detekcji (przekroczenie linii, wtargnięcie itd.) konfiguruje się w samej kamerze; adapter tylko nasłuchuje."
 }

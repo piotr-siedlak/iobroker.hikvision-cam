@@ -60,7 +60,7 @@ Use push mode only when the camera cannot keep an outgoing `alertStream` connect
 
 ### Test connection button
 
-Each camera row has a **Test connection** button. It uses the values currently in the row, so you don't need to save first, but the instance must be running. The test only sends GET requests:
+Each camera card has a **Test connection** button. It uses the values currently in the card, so you don't need to save first, but the instance must be running. The test only sends GET requests:
 
 1. It checks the settings.
 2. It reads `/ISAPI/System/deviceInfo` to show the model and firmware and confirm the credentials. A 403 here is reported but is not fatal.
@@ -155,6 +155,9 @@ on({ id: 'hikvision-cam.0.cameras.front_gate.events.intrusion.active', val: true
 * The stream-inactivity timeout is only armed after the stream delivered data once; before that, silent half-open TCP connections are detected only by TCP keep-alive.
 
 ## Changelog
+
+### 0.4.1
+* Admin: cameras are edited as cards (one per camera, labelled fields, collapsible) instead of a cramped table row; Test connection sits next to the login fields
 
 ### 0.4.0
 * Admin: per-camera **Test connection** button (read-only: settings, device info, alertStream)

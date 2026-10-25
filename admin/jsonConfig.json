@@ -8,7 +8,7 @@
       "items": {
         "_help": {
           "type": "staticText",
-          "text": "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.",
+          "text": "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.",
           "newLine": true,
           "xs": 12
         },
@@ -17,9 +17,9 @@
           "label": "Cameras",
           "xs": 12,
           "sm": 12,
-          "md": 12,
-          "lg": 12,
-          "xl": 12,
+          "md": 6,
+          "lg": 6,
+          "xl": 4,
           "noDelete": false,
           "items": [
             {
@@ -98,6 +98,19 @@
               "width": "130px"
             },
             {
+              "type": "sendTo",
+              "attr": "_test",
+              "title": "Test",
+              "width": "110px",
+              "label": "Test connection",
+              "command": "testConnection",
+              "jsonData": "{\"name\":\"${data.name}\",\"host\":\"${data.host}\",\"protocol\":\"${data.protocol}\",\"port\":\"${data.port}\",\"username\":\"${data.username}\",\"password\":\"${data.password}\",\"authMode\":\"${data.authMode}\",\"verifyTls\":\"${data.verifyTls}\",\"mode\":\"${data.mode}\"}",
+              "showProcess": true,
+              "timeout": 30000,
+              "variant": "outlined",
+              "icon": "search"
+            },
+            {
               "type": "select",
               "attr": "authMode",
               "title": "Authentication",
@@ -122,6 +135,14 @@
               "width": "110px",
               "default": true,
               "tooltip": "Untick only for cameras with a self-signed certificate"
+            },
+            {
+              "type": "checkbox",
+              "attr": "snapshot",
+              "title": "Snapshot on trigger",
+              "width": "110px",
+              "default": false,
+              "tooltip": "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage"
             },
             {
               "type": "number",
@@ -168,36 +189,25 @@
             },
             {
               "type": "checkbox",
-              "attr": "snapshot",
-              "title": "Snapshot on trigger",
-              "width": "110px",
-              "default": false,
-              "tooltip": "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage"
-            },
-            {
-              "type": "checkbox",
               "attr": "diagnostic",
               "title": "Log raw payloads (diagnostic)",
               "width": "130px",
               "default": false
-            },
-            {
-              "type": "sendTo",
-              "attr": "_test",
-              "title": "Test",
-              "width": "110px",
-              "label": "Test connection",
-              "command": "testConnection",
-              "jsonData": "{\"name\":\"${data.name}\",\"host\":\"${data.host}\",\"protocol\":\"${data.protocol}\",\"port\":\"${data.port}\",\"username\":\"${data.username}\",\"password\":\"${data.password}\",\"authMode\":\"${data.authMode}\",\"verifyTls\":\"${data.verifyTls}\",\"mode\":\"${data.mode}\"}",
-              "showProcess": true,
-              "timeout": 30000,
-              "variant": "outlined",
-              "icon": "search"
             }
           ],
           "encryptedAttributes": [
             "password"
-          ]
+          ],
+          "useCardFor": [
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl"
+          ],
+          "titleAttribute": "name",
+          "clone": true,
+          "compact": true
         }
       }
     },

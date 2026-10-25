@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "hikvision-cam",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "news": {
+      "0.4.1": {
+        "en": "Admin: cameras shown as readable cards with labelled fields",
+        "pl": "Panel: kamery wyświetlane jako czytelne karty z opisanymi polami"
+      },
       "0.4.0": {
         "en": "Test connection button per camera in the admin",
         "pl": "Przycisk testu połączenia dla każdej kamery w panelu"

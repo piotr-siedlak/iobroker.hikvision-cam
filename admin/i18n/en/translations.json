@@ -1,5 +1,4 @@
 {
-  "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.": "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.",
   "Cameras": "Cameras",
   "Enabled": "Enabled",
   "Name": "Name",
@@ -45,5 +44,6 @@
   "Trigger history size": "Trigger history size",
   "Recent triggers kept per camera in lastEvent.history (0 = off)": "Recent triggers kept per camera in lastEvent.history (0 = off)",
   "Test": "Test",
-  "Test connection": "Test connection"
+  "Test connection": "Test connection",
+  "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens.": "Add one card per camera with the + button. Fill in name, address and login, then press Test connection. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens."
 }
