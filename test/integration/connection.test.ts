@@ -1,5 +1,4 @@
 import { strict as assert } from 'node:assert';
-import * as http from 'node:http';
 import { afterEach, describe, it } from 'node:test';
 import { CameraClient } from '../../src/lib/CameraClient';
 import { ConnectionManager } from '../../src/lib/ConnectionManager';
