@@ -2,7 +2,7 @@
 
 Receives **real-time smart events directly from Hikvision IP cameras** (line crossing, intrusion, motion, human/vehicle classification, ...) through the ISAPI event stream and exposes them as ioBroker states. No NVR, no cloud, no Home Assistant, no polling.
 
-> **Status: 0.2.0 – early release.** All logic is covered by automated tests against a *mock* ISAPI camera built from the publicly documented format. It has **not yet been verified against a physical camera** (initial target: `DS-2CD2387G2-LU`). See [Known limitations](#known-limitations).
+> **Status: 0.3.0 – early release.** All logic is covered by automated tests against a *mock* ISAPI camera built from the publicly documented format. It has **not yet been verified against a physical camera** (initial target: `DS-2CD2387G2-LU`). See [Known limitations](#known-limitations).
 
 ## How it works
 
@@ -43,7 +43,20 @@ One table row per camera:
 | Stream inactivity timeout (s) | Default 60. If no data/heartbeat arrives for this long **after the stream has delivered data once**, the connection is dropped and re-established |
 | Ignore events | Comma separated normalized or raw names, e.g. `motion,vmd` |
 | Create unknown event types | Unknown event types are exposed under a sanitized id (default). Untick to drop them |
+| Mode | **Stream** (default, recommended): the adapter connects to the camera. **Push**: the camera posts alerts to the adapter's push listener, see [Push mode](#push-mode-optional) |
+| Snapshot on trigger | Opt-in. For each new trigger, fetches one JPEG from the camera's `/ISAPI/Streaming/channels/<ch>01/picture` (read-only, at most every 2 s, max 5 MB). Only the latest image per camera is kept, in the adapter file storage `hikvision-cam.0.snapshots/<camera>/latest.jpg`. The path is in `lastEvent.snapshot` |
 | Log raw payloads | Logs the first 50 payload heads and keeps the latest in `info.lastRawPayload` (credentials redacted) for diagnostics |
+
+Instance options: **Trigger history size** (default 20, 0 = off) keeps the newest triggers per camera in `lastEvent.history` as a JSON array (newest first). It survives restarts. For long-term history, enable ioBroker's history/InfluxDB/SQL adapter on the states you need.
+
+### Push mode (optional)
+
+Use push mode only when the camera cannot keep an outgoing `alertStream` connection (for example a firewall between ioBroker and the camera, or a firmware without alertStream). On the **Push listener** tab, set the port (default 8089) and optionally the address to listen on. In the camera, open *Configuration → Network → Advanced Settings → Alarm Server / HTTP Listening*. Set the destination IP to the ioBroker host, the URL to `/`, the port to the listener port and the protocol to HTTP. Then tick *Notify Surveillance Center* in each rule's linkage.
+
+* Only requests from the IP addresses (resolved host names) of cameras configured in push mode are accepted. Everything else gets HTTP 403. Bodies are size- and time-limited; images in pushes are skipped.
+* Camera credentials are optional in push mode. They are only used to read model/firmware and for snapshots.
+* **Limitation:** push has no persistent connection, so a dead camera cannot be detected. Alarms stay `unknown` until the first push after an adapter start, then they are tracked with the alarm timeout. `info.streamConnected` only means a push has been received. Prefer stream mode wherever possible.
+* Keep the listener port reachable from the camera network only. The listener has no authentication, because Hikvision HTTP Listening sends none.
 
 ### Verify ISAPI access first
 
@@ -125,10 +138,19 @@ on({ id: 'hikvision-cam.0.cameras.front_gate.events.intrusion.active', val: true
 
 * Not verified on physical cameras yet; event name mapping and field names (`detectionTarget`/`targetType`, `ruleID`, `regionID`) are based on public documentation and may differ per firmware. Camera-reported rule/region handling takes the *first* value in a payload.
 * Camera passwords are stored encrypted (Admin table `encryptedAttributes`, Admin ≥ 6.17.7). A password saved with 0.1.0 was stored in plain text: re-enter it once after updating. Still prefer a dedicated low-privilege camera user.
-* Images/snapshots in the stream are skipped, not stored. No HTTP push mode, ONVIF fallback, NVR multi-channel mapping, MQTT or history yet.
+* Images embedded in the stream/push are skipped. Snapshots are a separate, opt-in request, and only the latest image per camera is kept.
+* **NVR / multi-channel:** channels are tracked as independent slots (`events.<event>.rules.ch<N>…`), and snapshots are channel-aware. Connecting to an NVR's alertStream is untested, and channel names are not mapped.
+* **MQTT forwarding is intentionally not built in.** Use the ioBroker MQTT adapter to publish the states (e.g. `lastEvent.json`, `events.*.active`). This avoids running a second, unaudited MQTT client inside this adapter.
+* **ONVIF event fallback is not implemented.** It needs WS-Security SOAP PullPoint subscriptions, and every camera in scope offers ISAPI. It will be reconsidered if a camera without ISAPI events turns up.
 * The stream-inactivity timeout is only armed after the stream delivered data once; before that, silent half-open TCP connections are detected only by TCP keep-alive.
 
 ## Changelog
+
+### 0.3.0
+* Optional HTTP push mode (camera Alarm Server / HTTP Listening) with a sender allow-list and size/time limits
+* Opt-in snapshot on trigger (latest JPEG per camera in adapter file storage)
+* `lastEvent.history`: bounded, restart-safe history of recent triggers
+* Admin: Options and Push listener tabs
 
 ### 0.2.0
 * Camera passwords stored encrypted; re-enter passwords saved with 0.1.0
