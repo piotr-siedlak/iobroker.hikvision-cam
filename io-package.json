@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "hikvision-cam",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "news": {
+      "0.4.2": {
+        "en": "Admin: camera cards use the full width; values are no longer cut off",
+        "pl": "Panel: karty kamer na całą szerokość; wartości nie są już obcinane"
+      },
       "0.4.1": {
         "en": "Admin: cameras shown as readable cards with labelled fields",
         "pl": "Panel: kamery wyświetlane jako czytelne karty z opisanymi polami"

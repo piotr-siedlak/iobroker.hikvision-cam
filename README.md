@@ -156,6 +156,9 @@ on({ id: 'hikvision-cam.0.cameras.front_gate.events.intrusion.active', val: true
 
 ## Changelog
 
+### 0.4.2
+* Admin: camera cards use the full width; values are no longer cut off
+
 ### 0.4.1
 * Admin: cameras are edited as cards (one per camera, labelled fields, collapsible) instead of a cramped table row; Test connection sits next to the login fields
 
