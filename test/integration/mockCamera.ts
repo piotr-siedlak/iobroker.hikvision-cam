@@ -77,6 +77,7 @@ export async function startMock(o: MockOptions = {}, cleanups?: Cleanups): Promi
         }
         const connection = ++state.streams;
         res.writeHead(200, { 'Content-Type': 'multipart/mixed; boundary=boundary', Connection: 'keep-alive' });
+        res.flushHeaders(); // like a real camera: headers go out before the first event
         o.onStream?.(res, connection);
     });
     await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));

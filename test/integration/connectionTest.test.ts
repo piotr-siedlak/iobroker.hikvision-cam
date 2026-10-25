@@ -67,7 +67,8 @@ describe('Test connection (admin button)', () => {
     });
 
     it('rejects invalid settings without any network access', async () => {
-        assert.match((await testCamera(row(1, { host: 'http://x' }))).message, /invalid characters/);
+        assert.match((await testCamera(row(1, { host: 'http://x' }))).message, /Invalid|invalid/);
+        assert.match((await testCamera(row(1, { host: 'cam/../x' }))).message, /invalid characters/);
         assert.equal((await testCamera(row(1, { username: '' }))).ok, false);
     });
 
