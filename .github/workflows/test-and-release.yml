@@ -18,8 +18,22 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install --no-audit --no-fund
-      - run: npm run build
-      - run: npm test
+      - name: Build
+        shell: bash
+        run: |
+          set +e
+          out=$(npm run build 2>&1); code=$?
+          echo "$out"
+          if [ $code -ne 0 ]; then echo "::error title=build failed::$(echo "$out" | head -60 | sed ':a;N;$!ba;s/\n/%0A/g')"; fi
+          exit $code
+      - name: Test
+        shell: bash
+        run: |
+          set +e
+          out=$(npm test 2>&1); code=$?
+          echo "$out"
+          if [ $code -ne 0 ]; then echo "::error title=tests failed::$(echo "$out" | grep -v '^#' | grep -E 'not ok|error|Error|TS[0-9]+|failureType|expected|actual|message' | head -60 | sed ':a;N;$!ba;s/\n/%0A/g')"; fi
+          exit $code
       - name: Lint (informational for now)
         run: npm run lint
         continue-on-error: true
