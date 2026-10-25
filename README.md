@@ -2,7 +2,7 @@
 
 Receives **real-time smart events directly from Hikvision IP cameras** (line crossing, intrusion, motion, human/vehicle classification, ...) through the ISAPI event stream and exposes them as ioBroker states. No NVR, no cloud, no Home Assistant, no polling.
 
-> **Status: 0.1.0 – early release.** All logic is covered by automated tests against a *mock* ISAPI camera built from the publicly documented format. It has **not yet been verified against a physical camera** (initial target: `DS-2CD2387G2-LU`). See [Known limitations](#known-limitations).
+> **Status: 0.2.0 – early release.** All logic is covered by automated tests against a *mock* ISAPI camera built from the publicly documented format. It has **not yet been verified against a physical camera** (initial target: `DS-2CD2387G2-LU`). See [Known limitations](#known-limitations).
 
 ## How it works
 
@@ -43,7 +43,7 @@ One table row per camera:
 | Stream inactivity timeout (s) | Default 60. If no data/heartbeat arrives for this long **after the stream has delivered data once**, the connection is dropped and re-established |
 | Ignore events | Comma separated normalized or raw names, e.g. `motion,vmd` |
 | Create unknown event types | Unknown event types are exposed under a sanitized id (default). Untick to drop them |
-| Log raw payloads | Logs the first 50 payload heads (credentials redacted) for diagnostics |
+| Log raw payloads | Logs the first 50 payload heads and keeps the latest in `info.lastRawPayload` (credentials redacted) for diagnostics |
 
 ### Verify ISAPI access first
 
@@ -100,7 +100,7 @@ Authentication failures are never retried quickly: one retry after 30 minutes, a
 1. `curl` test above – nothing? Check *Notify Surveillance Center*, arming schedule, rule enabled, user permission.
 2. `info.status` / `info.lastError` tell why (wrong password, 403, unsupported firmware).
 3. Enable **Log raw payloads** and compare with the sample from `curl`; `info.parseErrors` > 0 means payloads could not be parsed – please open an issue with a sanitized sample.
-4. Some firmware limits the number of simultaneous alertStream clients (HTTP 503/"connection limit"): close other clients (iVMS, NVR, other integrations).
+4. Some firmware limits the number of simultaneous alertStream clients (`info.status` shows *Camera busy (HTTP 503)*): close other clients (iVMS, NVR, other integrations).
 
 ## Example script (JavaScript adapter)
 
@@ -124,9 +124,22 @@ on({ id: 'hikvision-cam.0.cameras.front_gate.events.intrusion.active', val: true
 ## Known limitations
 
 * Not verified on physical cameras yet; event name mapping and field names (`detectionTarget`/`targetType`, `ruleID`, `regionID`) are based on public documentation and may differ per firmware. Camera-reported rule/region handling takes the *first* value in a payload.
-* Passwords live in the instance configuration table; ioBroker's `encryptedNative` cannot encrypt values inside table rows. Use a dedicated low-privilege camera user. (To be revisited.)
+* Camera passwords are stored encrypted (Admin table `encryptedAttributes`, Admin ≥ 6.17.7). A password saved with 0.1.0 was stored in plain text: re-enter it once after updating. Still prefer a dedicated low-privilege camera user.
 * Images/snapshots in the stream are skipped, not stored. No HTTP push mode, ONVIF fallback, NVR multi-channel mapping, MQTT or history yet.
 * The stream-inactivity timeout is only armed after the stream delivered data once; before that, silent half-open TCP connections are detected only by TCP keep-alive.
+
+## Changelog
+
+### 0.2.0
+* Camera passwords stored encrypted; re-enter passwords saved with 0.1.0
+* Admin: tabs, camera setup guide, tooltips (en/pl)
+* Fix: Digest and Basic challenges sent in one combined header were mixed up
+* Clear diagnostics for HTTP 503 (stream client limit); `info.lastRawPayload` in diagnostic mode
+* Alarms are left `unknown` (not stale) when the adapter stops
+* Tests for the ioBroker publishing layer; lint enforced in CI
+
+### 0.1.0
+* Initial release
 
 ## Development
 

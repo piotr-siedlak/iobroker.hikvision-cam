@@ -12,7 +12,7 @@ export function parseWwwAuthenticate(header: string | string[] | undefined): Cha
     if (!header) {
         return [];
     }
-    const values = Array.isArray(header) ? header : [header];
+    const values = (Array.isArray(header) ? header : [header]).flatMap(splitChallenges);
     const out: Challenge[] = [];
     for (const value of values) {
         const m = /^\s*([A-Za-z]+)\s+([\s\S]*)$/.exec(value);
@@ -28,6 +28,20 @@ export function parseWwwAuthenticate(header: string | string[] | undefined): Cha
         out.push({ scheme: m[1].toLowerCase(), params });
     }
     return out;
+}
+
+/** Split "Digest realm=..., Basic realm=..." (one joined header value) into one string per scheme. */
+function splitChallenges(value: string): string[] {
+    const re = /(^|,)\s*(Digest|Basic|Bearer|Negotiate|NTLM)\s+/gi;
+    const starts: number[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(value)) !== null) {
+        starts.push(m.index + m[1].length);
+    }
+    if (starts.length < 2) {
+        return [value];
+    }
+    return starts.map((s, i) => value.slice(s, starts[i + 1] ?? value.length).replace(/,\s*$/, ''));
 }
 
 function assertHeaderSafe(value: string, what: string): void {

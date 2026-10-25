@@ -15,7 +15,14 @@ class HikvisionCam extends utils.Adapter {
     private async onReady(): Promise<void> {
         await this.setStateAsync('info.connection', false, true);
 
-        const { cameras, errors } = normalizeCameras((this.config as { cameras?: unknown }).cameras);
+        const rows = (this.config as { cameras?: unknown }).cameras;
+        // Admin encrypts the password column (jsonConfig table "encryptedAttributes").
+        const decrypted = Array.isArray(rows)
+            ? rows.map((row: Record<string, unknown>) =>
+                  typeof row?.password === 'string' && row.password ? { ...row, password: this.decrypt(row.password) } : row,
+              )
+            : rows;
+        const { cameras, errors } = normalizeCameras(decrypted);
         for (const e of errors) {
             this.log.error(e);
         }

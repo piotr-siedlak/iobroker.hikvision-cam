@@ -173,6 +173,14 @@ export class CameraRuntime {
         for (const def of INFO_STATES) {
             await this.ensureState(`${this.root}.info.${def.key}`, def);
         }
+        if (this.cfg.diagnostic) {
+            await this.ensureState(`${this.root}.info.lastRawPayload`, {
+                key: 'lastRawPayload',
+                type: 'string',
+                role: 'text',
+                name: N('Last raw payload (diagnostic, redacted)', 'Ostatnie surowe dane (diagnostyka, zanonimizowane)'),
+            });
+        }
         for (const def of LAST_EVENT_STATES) {
             await this.ensureState(`${this.root}.lastEvent.${def.key}`, def);
         }
@@ -270,11 +278,13 @@ export class CameraRuntime {
     }
 
     private onRaw(text: string): void {
+        const clean = redact(text, [this.cfg.password, this.cfg.username]);
+        this.enqueue(() => this.io.setState(`${this.root}.info.lastRawPayload`, clean));
         if (this.rawCaptured >= 50) {
             return;
         }
         this.rawCaptured++;
-        this.log.info(`[${this.id}] raw payload #${this.rawCaptured}: ${redact(text, [this.cfg.password, this.cfg.username])}`);
+        this.log.info(`[${this.id}] raw payload #${this.rawCaptured}: ${clean}`);
     }
 
     // ---- events ---------------------------------------------------------------

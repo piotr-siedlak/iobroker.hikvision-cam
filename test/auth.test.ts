@@ -17,6 +17,18 @@ describe('Digest authentication', () => {
         assert.match(header, /opaque="5ccc069c403ebaf9f0171e9517f40e41"/);
     });
 
+    it('splits Digest and Basic challenges joined into one header value', () => {
+        const ch = parseWwwAuthenticate('Digest realm="cam", qop="auth", nonce="n1", Basic realm="basic-realm"');
+        assert.deepEqual(
+            ch.map(c => [c.scheme, c.params.realm]),
+            [
+                ['digest', 'cam'],
+                ['basic', 'basic-realm'],
+            ],
+        );
+        assert.equal(ch[0].params.nonce, 'n1');
+    });
+
     it('increments the nonce count', () => {
         const auth = new DigestAuth('u', 'p', { nonce: 'n', realm: 'r', qop: 'auth' });
         auth.authorize('GET', '/');

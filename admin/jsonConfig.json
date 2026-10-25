@@ -1,59 +1,202 @@
 {
-  "type": "panel",
+  "type": "tabs",
   "i18n": true,
   "items": {
-    "_help": {
-      "type": "staticText",
-      "text": "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.",
-      "newLine": true,
-      "xs": 12
-    },
-    "cameras": {
-      "type": "table",
+    "_camerasTab": {
+      "type": "panel",
       "label": "Cameras",
-      "xs": 12,
-      "sm": 12,
-      "md": 12,
-      "lg": 12,
-      "xl": 12,
-      "noDelete": false,
-      "items": [
-        { "type": "checkbox", "attr": "enabled", "title": "Enabled", "width": "70px", "default": true },
-        { "type": "text", "attr": "name", "title": "Name", "width": "130px" },
-        { "type": "text", "attr": "host", "title": "IP address or host", "width": "150px" },
-        {
-          "type": "select",
-          "attr": "protocol",
-          "title": "Protocol",
-          "width": "90px",
-          "default": "http",
-          "options": [
-            { "label": "HTTP", "value": "http" },
-            { "label": "HTTPS", "value": "https" }
-          ]
+      "items": {
+        "_help": {
+          "type": "staticText",
+          "text": "Add one row per camera. Detection rules (line crossing, intrusion, ...) are configured in the camera itself; this adapter only listens. The camera user needs remote notification / alarm permission.",
+          "newLine": true,
+          "xs": 12
         },
-        { "type": "number", "attr": "port", "title": "Port", "width": "80px", "default": 80, "min": 1, "max": 65535 },
-        { "type": "text", "attr": "username", "title": "User", "width": "110px" },
-        { "type": "password", "attr": "password", "title": "Password", "width": "130px" },
-        {
-          "type": "select",
-          "attr": "authMode",
-          "title": "Authentication",
-          "width": "120px",
-          "default": "digest",
-          "options": [
-            { "label": "Digest (recommended)", "value": "digest" },
-            { "label": "Basic", "value": "basic" }
+        "cameras": {
+          "type": "table",
+          "label": "Cameras",
+          "xs": 12,
+          "sm": 12,
+          "md": 12,
+          "lg": 12,
+          "xl": 12,
+          "noDelete": false,
+          "items": [
+            {
+              "type": "checkbox",
+              "attr": "enabled",
+              "title": "Enabled",
+              "width": "70px",
+              "default": true
+            },
+            {
+              "type": "text",
+              "attr": "name",
+              "title": "Name",
+              "width": "130px"
+            },
+            {
+              "type": "text",
+              "attr": "host",
+              "title": "IP address or host",
+              "width": "150px"
+            },
+            {
+              "type": "select",
+              "attr": "protocol",
+              "title": "Protocol",
+              "width": "90px",
+              "default": "http",
+              "options": [
+                {
+                  "label": "HTTP",
+                  "value": "http"
+                },
+                {
+                  "label": "HTTPS",
+                  "value": "https"
+                }
+              ]
+            },
+            {
+              "type": "number",
+              "attr": "port",
+              "title": "Port",
+              "width": "80px",
+              "default": 80,
+              "min": 1,
+              "max": 65535
+            },
+            {
+              "type": "text",
+              "attr": "username",
+              "title": "User",
+              "width": "110px"
+            },
+            {
+              "type": "password",
+              "attr": "password",
+              "title": "Password",
+              "width": "130px"
+            },
+            {
+              "type": "select",
+              "attr": "authMode",
+              "title": "Authentication",
+              "width": "120px",
+              "default": "digest",
+              "options": [
+                {
+                  "label": "Digest (recommended)",
+                  "value": "digest"
+                },
+                {
+                  "label": "Basic",
+                  "value": "basic"
+                }
+              ],
+              "tooltip": "Basic sends the password unencrypted over HTTP; use only if the camera offers nothing else"
+            },
+            {
+              "type": "checkbox",
+              "attr": "verifyTls",
+              "title": "Verify TLS certificate",
+              "width": "110px",
+              "default": true,
+              "tooltip": "Untick only for cameras with a self-signed certificate"
+            },
+            {
+              "type": "number",
+              "attr": "alarmTimeout",
+              "title": "Alarm timeout (s)",
+              "width": "110px",
+              "default": 5,
+              "min": 1,
+              "max": 3600,
+              "tooltip": "Clears an active alarm that the camera stops refreshing (cameras that never send inactive)"
+            },
+            {
+              "type": "number",
+              "attr": "reconnectInterval",
+              "title": "Reconnect interval (s)",
+              "width": "120px",
+              "default": 5,
+              "min": 1,
+              "max": 3600
+            },
+            {
+              "type": "number",
+              "attr": "streamTimeout",
+              "title": "Stream inactivity timeout (s)",
+              "width": "140px",
+              "default": 60,
+              "min": 15,
+              "max": 3600,
+              "tooltip": "Reconnect when no data or heartbeat arrives for this long (armed after the first data)"
+            },
+            {
+              "type": "text",
+              "attr": "eventFilter",
+              "title": "Ignore events (comma separated)",
+              "width": "180px",
+              "tooltip": "Normalized or raw names, e.g. motion,vmd"
+            },
+            {
+              "type": "checkbox",
+              "attr": "discoverUnknown",
+              "title": "Create unknown event types",
+              "width": "130px",
+              "default": true
+            },
+            {
+              "type": "checkbox",
+              "attr": "diagnostic",
+              "title": "Log raw payloads (diagnostic)",
+              "width": "130px",
+              "default": false
+            }
+          ],
+          "encryptedAttributes": [
+            "password"
           ]
+        }
+      }
+    },
+    "_setupTab": {
+      "type": "panel",
+      "label": "Camera setup",
+      "items": {
+        "_h1": {
+          "type": "header",
+          "text": "Before adding a camera",
+          "size": 4,
+          "newLine": true
         },
-        { "type": "checkbox", "attr": "verifyTls", "title": "Verify TLS certificate", "width": "110px", "default": true },
-        { "type": "number", "attr": "alarmTimeout", "title": "Alarm timeout (s)", "width": "110px", "default": 5, "min": 1, "max": 3600 },
-        { "type": "number", "attr": "reconnectInterval", "title": "Reconnect interval (s)", "width": "120px", "default": 5, "min": 1, "max": 3600 },
-        { "type": "number", "attr": "streamTimeout", "title": "Stream inactivity timeout (s)", "width": "140px", "default": 60, "min": 15, "max": 3600 },
-        { "type": "text", "attr": "eventFilter", "title": "Ignore events (comma separated)", "width": "180px" },
-        { "type": "checkbox", "attr": "discoverUnknown", "title": "Create unknown event types", "width": "130px", "default": true },
-        { "type": "checkbox", "attr": "diagnostic", "title": "Log raw payloads (diagnostic)", "width": "130px", "default": false }
-      ]
+        "_s1": {
+          "type": "staticText",
+          "text": "1. In the camera web UI, for every rule you want to receive (Event > Smart Event / Basic Event), open Linkage Method and tick 'Notify Surveillance Center'. Enabling a rule alone does not send it over ISAPI.",
+          "newLine": true,
+          "xs": 12
+        },
+        "_s2": {
+          "type": "staticText",
+          "text": "2. Create a camera user with remote notification / alarm permission. Administrator rights are not needed.",
+          "newLine": true,
+          "xs": 12
+        },
+        "_s3": {
+          "type": "staticText",
+          "text": "3. Check access from the ioBroker host: curl --digest -N -u USER 'http://CAMERA_IP/ISAPI/Event/notification/alertStream' (curl asks for the password). Events and a heartbeat should appear.",
+          "newLine": true,
+          "xs": 12
+        },
+        "_s4": {
+          "type": "staticText",
+          "text": "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings.",
+          "newLine": true,
+          "xs": 12
+        }
+      }
     }
   }
 }

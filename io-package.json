@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "hikvision-cam",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "Camera passwords stored encrypted, admin setup guide, combined Digest/Basic challenge fix, HTTP 503 diagnostics, raw payload state",
+        "pl": "Hasła kamer przechowywane w formie zaszyfrowanej, przewodnik konfiguracji w panelu, poprawka łączonych wyzwań Digest/Basic, diagnostyka HTTP 503, stan surowych danych"
+      },
       "0.1.0": {
         "en": "Initial release: real-time ISAPI alertStream events",
         "pl": "Pierwsze wydanie: zdarzenia ISAPI alertStream w czasie rzeczywistym"

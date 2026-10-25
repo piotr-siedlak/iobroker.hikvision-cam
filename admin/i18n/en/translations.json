@@ -17,5 +17,16 @@
   "Stream inactivity timeout (s)": "Stream inactivity timeout (s)",
   "Ignore events (comma separated)": "Ignore events (comma separated)",
   "Create unknown event types": "Create unknown event types",
-  "Log raw payloads (diagnostic)": "Log raw payloads (diagnostic)"
+  "Log raw payloads (diagnostic)": "Log raw payloads (diagnostic)",
+  "Camera setup": "Camera setup",
+  "Before adding a camera": "Before adding a camera",
+  "Clears an active alarm that the camera stops refreshing (cameras that never send inactive)": "Clears an active alarm that the camera stops refreshing (cameras that never send inactive)",
+  "Reconnect when no data or heartbeat arrives for this long (armed after the first data)": "Reconnect when no data or heartbeat arrives for this long (armed after the first data)",
+  "Normalized or raw names, e.g. motion,vmd": "Normalized or raw names, e.g. motion,vmd",
+  "Untick only for cameras with a self-signed certificate": "Untick only for cameras with a self-signed certificate",
+  "Basic sends the password unencrypted over HTTP; use only if the camera offers nothing else": "Basic sends the password unencrypted over HTTP; use only if the camera offers nothing else",
+  "1. In the camera web UI, for every rule you want to receive (Event > Smart Event / Basic Event), open Linkage Method and tick 'Notify Surveillance Center'. Enabling a rule alone does not send it over ISAPI.": "1. In the camera web UI, for every rule you want to receive (Event > Smart Event / Basic Event), open Linkage Method and tick 'Notify Surveillance Center'. Enabling a rule alone does not send it over ISAPI.",
+  "2. Create a camera user with remote notification / alarm permission. Administrator rights are not needed.": "2. Create a camera user with remote notification / alarm permission. Administrator rights are not needed.",
+  "3. Check access from the ioBroker host: curl --digest -N -u USER 'http://CAMERA_IP/ISAPI/Event/notification/alertStream' (curl asks for the password). Events and a heartbeat should appear.": "3. Check access from the ioBroker host: curl --digest -N -u USER 'http://CAMERA_IP/ISAPI/Event/notification/alertStream' (curl asks for the password). Events and a heartbeat should appear.",
+  "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings.": "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings."
 }
