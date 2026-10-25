@@ -32,6 +32,17 @@ export interface Failure {
     status?: number;
 }
 
+/** Rejection of getText/getBuffer; keeps the failure kind for diagnostics. */
+export class RequestError extends Error {
+    constructor(
+        readonly kind: FailureKind,
+        message: string,
+        readonly status?: number,
+    ) {
+        super(message);
+    }
+}
+
 export interface StreamHandlers {
     onOpen(info: { contentType: string; boundary?: string }): void;
     onData(chunk: Buffer): void;
@@ -168,7 +179,7 @@ export class CameraClient implements StreamOpener {
                     res.on('end', () => settle(() => resolve({ body: Buffer.concat(chunks), contentType })));
                     res.on('error', err => settle(() => reject(err)));
                 },
-                onFail: f => settle(() => reject(new Error(f.message))),
+                onFail: f => settle(() => reject(new RequestError(f.kind, f.message, f.status))),
             });
         });
     }

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.hikvision-cam",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Real-time Hikvision camera events (line crossing, intrusion, motion, human/vehicle) via the ISAPI alertStream",
   "author": {
     "name": "Piotr Siedlak"

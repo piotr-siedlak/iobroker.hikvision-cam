@@ -1,5 +1,6 @@
 import * as utils from '@iobroker/adapter-core';
 import { CameraRuntime } from './lib/CameraRuntime';
+import { testCamera } from './lib/ConnectionTest';
 import { normalizeCameras, normalizeHistorySize, normalizePushSettings } from './lib/config';
 import { PushServer } from './lib/PushServer';
 import type { IoApi, LogApi } from './lib/io';
@@ -7,11 +8,13 @@ import type { IoApi, LogApi } from './lib/io';
 class HikvisionCam extends utils.Adapter {
     private runtimes: CameraRuntime[] = [];
     private pushServer: PushServer | undefined;
+    private readonly testsRunning = new Set<string>();
 
     constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({ ...options, name: 'hikvision-cam' });
         this.on('ready', () => void this.onReady());
         this.on('unload', callback => void this.onUnload(callback));
+        this.on('message', obj => void this.onMessage(obj));
     }
 
     private async onReady(): Promise<void> {
@@ -89,6 +92,40 @@ class HikvisionCam extends utils.Adapter {
             for (const r of pushRuntimes) {
                 r.setPushListenerError(msg);
             }
+        }
+    }
+
+    /** Admin "Test connection" button (sendTo command `testConnection`) with the row's current values. */
+    private async onMessage(obj: ioBroker.Message): Promise<void> {
+        if (!obj?.callback || obj.command !== 'testConnection') {
+            return;
+        }
+        const reply = (payload: { result?: string; error?: string }): void => {
+            this.sendTo(obj.from, obj.command, payload, obj.callback);
+        };
+        let row: unknown = obj.message;
+        if (typeof row === 'string') {
+            try {
+                row = JSON.parse(row);
+            } catch {
+                reply({ error: 'Could not read the camera row. Save the settings and try again.' });
+                return;
+            }
+        }
+        const key = String((row as Record<string, unknown> | null)?.host ?? '');
+        if (this.testsRunning.has(key)) {
+            reply({ error: 'A test for this camera is already running' });
+            return;
+        }
+        this.testsRunning.add(key);
+        try {
+            const res = await testCamera(row);
+            this.log.info(`Connection test for ${key || 'camera'}: ${res.ok ? 'OK' : 'failed'}`);
+            reply(res.ok ? { result: res.message } : { error: res.message });
+        } catch (err) {
+            reply({ error: err instanceof Error ? err.message : String(err) });
+        } finally {
+            this.testsRunning.delete(key);
         }
     }
 

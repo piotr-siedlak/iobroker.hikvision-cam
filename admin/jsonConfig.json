@@ -180,6 +180,19 @@
               "title": "Log raw payloads (diagnostic)",
               "width": "130px",
               "default": false
+            },
+            {
+              "type": "sendTo",
+              "attr": "_test",
+              "title": "Test",
+              "width": "110px",
+              "label": "Test connection",
+              "command": "testConnection",
+              "jsonData": "{\"name\":\"${data.name}\",\"host\":\"${data.host}\",\"protocol\":\"${data.protocol}\",\"port\":\"${data.port}\",\"username\":\"${data.username}\",\"password\":\"${data.password}\",\"authMode\":\"${data.authMode}\",\"verifyTls\":\"${data.verifyTls}\",\"mode\":\"${data.mode}\"}",
+              "showProcess": true,
+              "timeout": 30000,
+              "variant": "outlined",
+              "icon": "search"
             }
           ],
           "encryptedAttributes": [

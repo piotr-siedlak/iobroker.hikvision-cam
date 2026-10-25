@@ -43,5 +43,7 @@
   "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage": "Pobierz jedno zdjęcie JPEG z kamery przy każdym nowym wyzwoleniu i zachowaj najnowsze w pamięci plików adaptera",
   "Options": "Opcje",
   "Trigger history size": "Rozmiar historii wyzwoleń",
-  "Recent triggers kept per camera in lastEvent.history (0 = off)": "Liczba ostatnich wyzwoleń na kamerę w lastEvent.history (0 = wyłączone)"
+  "Recent triggers kept per camera in lastEvent.history (0 = off)": "Liczba ostatnich wyzwoleń na kamerę w lastEvent.history (0 = wyłączone)",
+  "Test": "Test",
+  "Test connection": "Testuj połączenie"
 }

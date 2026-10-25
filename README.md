@@ -58,6 +58,16 @@ Use push mode only when the camera cannot keep an outgoing `alertStream` connect
 * **Limitation:** push has no persistent connection, so a dead camera cannot be detected. Alarms stay `unknown` until the first push after an adapter start, then they are tracked with the alarm timeout. `info.streamConnected` only means a push has been received. Prefer stream mode wherever possible.
 * Keep the listener port reachable from the camera network only. The listener has no authentication, because Hikvision HTTP Listening sends none.
 
+### Test connection button
+
+Each camera row has a **Test connection** button. It uses the values currently in the row, so you don't need to save first, but the instance must be running. The test only sends GET requests:
+
+1. It checks the settings.
+2. It reads `/ISAPI/System/deviceInfo` to show the model and firmware and confirm the credentials. A 403 here is reported but is not fatal.
+3. It opens the alertStream and closes it as soon as the camera accepts it.
+
+It stops at the first rejected login, so a wrong password costs exactly one failed attempt on the camera. Passwords containing `"` or `\` cannot be passed by the button; save the settings and use the instance status instead.
+
 ### Verify ISAPI access first
 
 ```bash
@@ -145,6 +155,9 @@ on({ id: 'hikvision-cam.0.cameras.front_gate.events.intrusion.active', val: true
 * The stream-inactivity timeout is only armed after the stream delivered data once; before that, silent half-open TCP connections are detected only by TCP keep-alive.
 
 ## Changelog
+
+### 0.4.0
+* Admin: per-camera **Test connection** button (read-only: settings, device info, alertStream)
 
 ### 0.3.0
 * Optional HTTP push mode (camera Alarm Server / HTTP Listening) with a sender allow-list and size/time limits

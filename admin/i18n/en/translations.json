@@ -43,5 +43,7 @@
   "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage": "Fetch one JPEG from the camera for each new trigger and keep the latest in the adapter file storage",
   "Options": "Options",
   "Trigger history size": "Trigger history size",
-  "Recent triggers kept per camera in lastEvent.history (0 = off)": "Recent triggers kept per camera in lastEvent.history (0 = off)"
+  "Recent triggers kept per camera in lastEvent.history (0 = off)": "Recent triggers kept per camera in lastEvent.history (0 = off)",
+  "Test": "Test",
+  "Test connection": "Test connection"
 }

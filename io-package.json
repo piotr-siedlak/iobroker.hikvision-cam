@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "hikvision-cam",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "news": {
+      "0.4.0": {
+        "en": "Test connection button per camera in the admin",
+        "pl": "Przycisk testu połączenia dla każdej kamery w panelu"
+      },
       "0.3.0": {
         "en": "Optional HTTP push mode, opt-in snapshot on trigger, trigger history",
         "pl": "Opcjonalny tryb push HTTP, opcjonalne zdjęcie przy wyzwoleniu, historia wyzwoleń"
@@ -49,6 +53,7 @@
     "mode": "daemon",
     "type": "iot-systems",
     "compact": true,
+    "messagebox": true,
     "connectionType": "local",
     "dataSource": "push",
     "adminUI": {
