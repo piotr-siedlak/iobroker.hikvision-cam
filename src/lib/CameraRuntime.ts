@@ -81,6 +81,8 @@ export interface RuntimeOptions {
     onConnectionChange?: () => void;
     /** Test hook / future NVR support: custom stream source. */
     opener?: StreamOpener;
+    /** Test hook: replaces the ISAPI deviceInfo request. */
+    fetchText?: (path: string) => Promise<string>;
 }
 
 /** Everything that belongs to one camera: connection, alarm state, ioBroker objects. */
@@ -194,6 +196,8 @@ export class CameraRuntime {
 
     async stop(): Promise<void> {
         this.manager.stop();
+        // Shutting down is not "no alarm": leave every alarm unknown for whoever reads the states next.
+        this.states.setConnected(false);
         this.states.dispose();
         await Promise.race([this.chain, new Promise<void>(resolve => setTimeout(resolve, 2000).unref?.())]);
         try {
@@ -446,7 +450,7 @@ export class CameraRuntime {
 
     private async fetchDeviceInfo(): Promise<void> {
         try {
-            const xml = await this.client.getText(DEVICE_INFO_PATH);
+            const xml = await (this.runtimeOpts.fetchText ?? ((p: string) => this.client.getText(p)))(DEVICE_INFO_PATH);
             const fields = new Map<string, string>();
             flattenXml(parseXml(xml), fields);
             const model = fields.get('model');

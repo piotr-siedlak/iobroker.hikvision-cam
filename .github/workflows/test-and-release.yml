@@ -34,9 +34,14 @@ jobs:
           echo "$out"
           if [ $code -ne 0 ]; then echo "::error title=tests failed::$(echo "$out" | grep -v '^#' | grep -E 'not ok|error|Error|TS[0-9]+|failureType|expected|actual|message' | head -60 | sed ':a;N;$!ba;s/\n/%0A/g')"; fi
           exit $code
-      - name: Lint (informational for now)
-        run: npm run lint
-        continue-on-error: true
+      - name: Lint
+        shell: bash
+        run: |
+          set +e
+          out=$(npm run lint 2>&1); code=$?
+          echo "$out"
+          if [ $code -ne 0 ]; then echo "::error title=lint failed::$(echo "$out" | head -80 | sed ':a;N;$!ba;s/\n/%0A/g')"; fi
+          exit $code
 
   # GitHub installs of ioBroker adapters run no build step, so the compiled
   # output in build/ is committed by CI after a green test run on main.
