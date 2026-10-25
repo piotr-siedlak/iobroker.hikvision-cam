@@ -28,5 +28,15 @@
   "1. In the camera web UI, for every rule you want to receive (Event > Smart Event / Basic Event), open Linkage Method and tick 'Notify Surveillance Center'. Enabling a rule alone does not send it over ISAPI.": "1. In the camera web UI, for every rule you want to receive (Event > Smart Event / Basic Event), open Linkage Method and tick 'Notify Surveillance Center'. Enabling a rule alone does not send it over ISAPI.",
   "2. Create a camera user with remote notification / alarm permission. Administrator rights are not needed.": "2. Create a camera user with remote notification / alarm permission. Administrator rights are not needed.",
   "3. Check access from the ioBroker host: curl --digest -N -u USER 'http://CAMERA_IP/ISAPI/Event/notification/alertStream' (curl asks for the password). Events and a heartbeat should appear.": "3. Check access from the ioBroker host: curl --digest -N -u USER 'http://CAMERA_IP/ISAPI/Event/notification/alertStream' (curl asks for the password). Events and a heartbeat should appear.",
-  "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings.": "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings."
+  "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings.": "The adapter is read-only: it never changes detection rules, schedules, linkage or network settings.",
+  "Mode": "Mode",
+  "Stream": "Stream",
+  "Push": "Push",
+  "Stream: the adapter connects to the camera (recommended). Push: the camera sends alerts to the adapter's push listener": "Stream: the adapter connects to the camera (recommended). Push: the camera sends alerts to the adapter's push listener",
+  "Push listener": "Push listener",
+  "Listener port": "Listener port",
+  "Listen on address": "Listen on address",
+  "Optional. Only used by cameras whose mode is Push. Stream mode is recommended: it detects lost connections, push mode cannot.": "Optional. Only used by cameras whose mode is Push. Stream mode is recommended: it detects lost connections, push mode cannot.",
+  "Camera: Configuration > Network > Advanced Settings > Alarm Server (HTTP Listening): destination IP = this ioBroker host, URL = /, port = listener port, protocol HTTP. Then tick 'Notify Surveillance Center' in each rule's linkage.": "Camera: Configuration > Network > Advanced Settings > Alarm Server (HTTP Listening): destination IP = this ioBroker host, URL = /, port = listener port, protocol HTTP. Then tick 'Notify Surveillance Center' in each rule's linkage.",
+  "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only.": "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only."
 }

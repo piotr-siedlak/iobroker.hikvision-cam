@@ -33,7 +33,7 @@ function cfg(over: Partial<NormalizedCameraConfig> = {}): NormalizedCameraConfig
     return {
         id: 'gate', name: 'Gate', host: '192.0.2.10', https: false, port: 80, username: 'u', password: 'p',
         authMode: 'digest', verifyTls: true, reconnectIntervalMs: 1000, alarmTimeoutMs: 60_000, streamTimeoutMs: 60_000,
-        eventFilter: new Set(), discoverUnknown: true, diagnostic: false, ...over,
+        eventFilter: new Set(), discoverUnknown: true, diagnostic: false, mode: 'stream', ...over,
     };
 }
 
@@ -125,6 +125,23 @@ describe('CameraRuntime (fake ioBroker)', () => {
         t.feed('<EventNotificationAlert><eventType>', alertXml({ eventType: 'VMD' }));
         await until(() => t.store.get(`${E}.motion.active`) === true);
         assert.equal(t.store.get('cameras.gate.info.parseErrors'), 1);
+        await t.rt.stop();
+    });
+});
+
+describe('CameraRuntime push mode', () => {
+    it('stays unknown until the first push, then tracks alarms', async () => {
+        const t = setup({ [`${E}.intrusion.active`]: true }, { mode: 'push' });
+        await t.rt.init();
+        t.rt.start();
+        assert.equal(t.store.get(`${E}.intrusion.active`), null);
+        await until(() => t.store.get('cameras.gate.info.status') === 'push: waiting for first alert');
+        const target = t.rt.pushTarget();
+        target.onPart({ contentType: 'application/xml', headers: {}, body: Buffer.from(alertXml({ eventType: 'fielddetection', target: 'vehicle' })) });
+        await until(() => t.store.get(`${E}.intrusion.active`) === true);
+        assert.equal(t.store.get(`${E}.intrusion.vehicle.active`), true);
+        assert.equal(t.store.get('cameras.gate.info.connection'), true);
+        assert.equal(t.store.get('cameras.gate.info.status'), 'push: receiving');
         await t.rt.stop();
     });
 });

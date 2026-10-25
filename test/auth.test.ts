@@ -97,3 +97,13 @@ describe('config', () => {
         assert.equal(cameras[0].authMode, 'digest');
     });
 });
+
+describe('push settings', () => {
+    it('defaults and validates the bind address', async () => {
+        const { normalizePushSettings } = await import('../src/lib/config');
+        assert.deepEqual(normalizePushSettings({}).settings, { port: 8089, bind: '' });
+        assert.deepEqual(normalizePushSettings({ pushPort: 9000, pushBind: '192.168.1.5' }).settings, { port: 9000, bind: '192.168.1.5' });
+        assert.ok(normalizePushSettings({ pushBind: 'http://x' }).error);
+        assert.equal(normalizeCameras([{ name: 'a', host: '10.0.0.1', mode: 'push' }]).cameras[0].mode, 'push');
+    });
+});

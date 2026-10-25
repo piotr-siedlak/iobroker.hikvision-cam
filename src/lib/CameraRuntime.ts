@@ -3,11 +3,13 @@ import type { StreamOpener } from './CameraClient';
 import { ConnectionManager } from './ConnectionManager';
 import type { ConnState } from './ConnectionManager';
 import type { NormalizedCameraConfig } from './config';
+import { fieldsToEvent, parsePart } from './EventNormalizer';
 import { EventStateManager } from './EventStateManager';
 import type { EventOutcome, StateChange } from './EventStateManager';
 import type { IoApi, LogApi, StateVal } from './io';
 import { RetryPolicy } from './RetryPolicy';
-import type { HikvisionEvent } from './types';
+import type { PushTarget } from './PushServer';
+import type { HikvisionEvent, StreamPart } from './types';
 import { describeError, redact } from './util';
 import { flattenXml, parseXml } from './xml';
 
@@ -106,6 +108,7 @@ export class CameraRuntime {
     private lastHeartbeatWrite = 0;
     private rawCaptured = 0;
     private lastLoggedReason = '';
+    private pushSeen = false;
 
     constructor(
         private readonly cfg: NormalizedCameraConfig,
@@ -198,8 +201,72 @@ export class CameraRuntime {
     }
 
     start(): void {
+        if (this.cfg.mode === 'push') {
+            this.log.debug(`[${this.id}] push mode: waiting for alerts from ${this.cfg.host}`);
+            this.enqueue(() => this.io.setState(`${this.root}.info.status`, 'push: waiting for first alert'));
+            if (this.cfg.username) {
+                void this.fetchDeviceInfo();
+            }
+            return;
+        }
         this.log.debug(`[${this.id}] starting stream to ${this.cfg.https ? 'https' : 'http'}://${this.cfg.host}:${this.cfg.port}`);
         this.manager.start();
+    }
+
+    /** Receiver hooks for the shared push listener (push mode only). */
+    pushTarget(): PushTarget {
+        return {
+            id: this.id,
+            host: this.cfg.host,
+            onPart: part => this.ingestPushPart(part),
+            onParseError: msg => this.onParseError(msg),
+        };
+    }
+
+    setPushListenerError(message: string): void {
+        this.enqueue(async () => {
+            await this.io.setState(`${this.root}.info.status`, `push: listener failed: ${message}`);
+            await this.io.setState(`${this.root}.info.lastError`, message);
+        });
+    }
+
+    /**
+     * Push mode has no persistent connection, so "disconnected" cannot be
+     * detected: alarms stay unknown until the first push of this run arrives,
+     * then they are tracked (with the alarm timeout) like stream events.
+     */
+    private ingestPushPart(part: StreamPart): void {
+        let ev: HikvisionEvent | null;
+        try {
+            const fields = parsePart(part);
+            if (!fields) {
+                return;
+            }
+            if (this.cfg.diagnostic) {
+                this.onRaw(part.body.toString('utf8', 0, 2000));
+            }
+            ev = fieldsToEvent(fields, this.id, new Date().toISOString(), { discoverUnknown: this.cfg.discoverUnknown });
+        } catch (err) {
+            this.onParseError(describeError(err));
+            return;
+        }
+        if (!this.pushSeen) {
+            this.pushSeen = true;
+            this.connected = true;
+            this.states.setConnected(true);
+            const now = new Date().toISOString();
+            this.enqueue(async () => {
+                await this.io.setState(`${this.root}.info.connection`, true);
+                await this.io.setState(`${this.root}.info.streamConnected`, true);
+                await this.io.setState(`${this.root}.info.lastSuccessfulConnection`, now);
+                await this.io.setState(`${this.root}.info.status`, 'push: receiving');
+            });
+            this.log.info(`[${this.id}] first push alert received`);
+            this.runtimeOpts.onConnectionChange?.();
+        }
+        if (ev) {
+            this.onEvent(ev);
+        }
     }
 
     async stop(): Promise<void> {

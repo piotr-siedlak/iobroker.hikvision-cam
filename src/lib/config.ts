@@ -16,6 +16,22 @@ export interface NormalizedCameraConfig {
     eventFilter: Set<string>;
     discoverUnknown: boolean;
     diagnostic: boolean;
+    /** stream = adapter connects to alertStream; push = camera posts alerts to the adapter's listener. */
+    mode: 'stream' | 'push';
+}
+
+export interface PushSettings {
+    port: number;
+    bind: string;
+}
+
+export function normalizePushSettings(native: Record<string, unknown>): { settings: PushSettings; error?: string } {
+    const port = Math.round(num(native.pushPort, 8089, 1, 65535));
+    const bind = String(native.pushBind ?? '').trim();
+    if (bind && bind !== '0.0.0.0' && bind !== '::' && validateHost(bind)) {
+        return { settings: { port, bind: '' }, error: `Invalid push bind address "${bind}"; listening on all interfaces` };
+    }
+    return { settings: { port, bind: bind === '0.0.0.0' ? '' : bind } };
 }
 
 function num(value: unknown, def: number, min: number, max: number): number {
@@ -85,6 +101,7 @@ export function normalizeCameras(rows: unknown): { cameras: NormalizedCameraConf
             ),
             discoverUnknown: bool(row.discoverUnknown, true),
             diagnostic: bool(row.diagnostic, false),
+            mode: String(row.mode ?? 'stream').toLowerCase() === 'push' ? 'push' : 'stream',
         });
     });
     return { cameras, errors };

@@ -36,6 +36,24 @@
               "width": "130px"
             },
             {
+              "type": "select",
+              "attr": "mode",
+              "title": "Mode",
+              "width": "110px",
+              "default": "stream",
+              "tooltip": "Stream: the adapter connects to the camera (recommended). Push: the camera sends alerts to the adapter's push listener",
+              "options": [
+                {
+                  "label": "Stream",
+                  "value": "stream"
+                },
+                {
+                  "label": "Push",
+                  "value": "push"
+                }
+              ]
+            },
+            {
               "type": "text",
               "attr": "host",
               "title": "IP address or host",
@@ -159,6 +177,50 @@
           "encryptedAttributes": [
             "password"
           ]
+        }
+      }
+    },
+    "_pushTab": {
+      "type": "panel",
+      "label": "Push listener",
+      "items": {
+        "_p0": {
+          "type": "staticText",
+          "newLine": true,
+          "xs": 12,
+          "text": "Optional. Only used by cameras whose mode is Push. Stream mode is recommended: it detects lost connections, push mode cannot."
+        },
+        "pushPort": {
+          "type": "number",
+          "label": "Listener port",
+          "min": 1,
+          "max": 65535,
+          "default": 8089,
+          "newLine": true,
+          "xs": 12,
+          "sm": 6,
+          "md": 3
+        },
+        "pushBind": {
+          "type": "ip",
+          "label": "Listen on address",
+          "listenOnAllPorts": true,
+          "default": "0.0.0.0",
+          "xs": 12,
+          "sm": 6,
+          "md": 4
+        },
+        "_p1": {
+          "type": "staticText",
+          "newLine": true,
+          "xs": 12,
+          "text": "Camera: Configuration > Network > Advanced Settings > Alarm Server (HTTP Listening): destination IP = this ioBroker host, URL = /, port = listener port, protocol HTTP. Then tick 'Notify Surveillance Center' in each rule's linkage."
+        },
+        "_p2": {
+          "type": "staticText",
+          "newLine": true,
+          "xs": 12,
+          "text": "Only requests from the IP addresses of configured push cameras are accepted. Keep the port reachable from the camera network only."
         }
       }
     },
